@@ -1,0 +1,2176 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vektorwerk</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><path d='M4 26 16 4l12 22z' fill='%23ff6a3d'/></svg>">
+<style>
+:root{
+  --bg:#f4f3f0; --panel:#ffffff; --ink:#1b1b1d; --muted:#6c6b70; --line:#e4e2dc;
+  --accent:#ff6a3d; --accent-ink:#fff; --soft:#f7f6f3; --warn-bg:#fff4e0; --warn:#8a5a00;
+  --ok:#1f8a52; --ok-bg:#e6f6ec; --bad:#d6342c; --radius:12px; --shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.05);
+}
+@media (prefers-color-scheme: dark){
+  :root{--bg:#141416;--panel:#1d1d20;--ink:#ececee;--muted:#9a99a0;--line:#2e2e33;--soft:#26262a;--warn-bg:#3a2d12;--warn:#f3c977;--ok:#5fd394;--ok-bg:#16301f;--bad:#ff6b63;--shadow:none}
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Inter,sans-serif;display:flex;flex-direction:column}
+header{display:flex;align-items:center;gap:12px;padding:10px 20px;border-bottom:1px solid var(--line);background:var(--panel);flex-wrap:wrap}
+header .logo{width:26px;height:26px}
+header h1{font-size:16px;margin:0;letter-spacing:.2px}
+header p{margin:0;color:var(--muted);font-size:13px}
+.proj{margin-left:auto;display:flex;gap:6px;align-items:center}
+.proj input{font:inherit;color:inherit;background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:6px 9px;width:200px}
+.proj .saved{font-size:12px;color:var(--muted);min-width:90px;text-align:right}
+main{flex:1;display:grid;grid-template-columns:300px 1fr 320px;min-height:0}
+aside{background:var(--panel);overflow:auto;padding:16px;display:flex;flex-direction:column;gap:18px}
+aside.left{border-right:1px solid var(--line)}
+aside.right{border-left:1px solid var(--line)}
+h2{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 8px;font-weight:600;display:flex;justify-content:space-between;align-items:center;gap:6px}
+h2 .link{text-transform:none;letter-spacing:0;font-weight:500;font-size:12px}
+
+.drop{border:1.5px dashed var(--line);border-radius:var(--radius);padding:18px;text-align:center;color:var(--muted);cursor:pointer;transition:.15s;background:var(--soft);display:block}
+.drop:hover,.drop.over{border-color:var(--accent);color:var(--ink)}
+.drop strong{display:block;color:var(--ink);margin-bottom:2px}
+.files{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.file{display:flex;align-items:center;gap:10px;padding:6px;border-radius:9px;cursor:pointer;border:1px solid transparent}
+.file:hover{background:var(--soft)}
+.file.active{border-color:var(--accent);background:var(--soft)}
+.file img{width:38px;height:38px;object-fit:contain;border-radius:6px;background:#fff;border:1px solid var(--line)}
+.file .n{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.file .s{font-size:11px;color:var(--muted)}
+.file .x{opacity:0}
+.file:hover .x{opacity:1}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--line);flex:none}
+.dot.busy{background:var(--accent);animation:pulse 1s infinite}
+.dot.done{background:#2fb36a}.dot.err{background:#d33}
+@keyframes pulse{50%{opacity:.3}}
+
+.presets{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.preset{border:1px solid var(--line);border-radius:10px;padding:9px;cursor:pointer;background:var(--panel);text-align:left;color:inherit;font:inherit}
+.preset b{display:block;font-size:13px}
+.preset span{font-size:11px;color:var(--muted);line-height:1.3;display:block;margin-top:2px}
+.preset.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.field label{display:flex;justify-content:space-between;font-size:13px}
+.field label output{color:var(--muted);font-variant-numeric:tabular-nums}
+.check{display:flex;gap:8px;align-items:flex-start;font-size:13px;cursor:pointer;margin-bottom:8px}
+.check input{accent-color:var(--accent);margin-top:3px}
+.check small{display:block;color:var(--muted);font-size:11.5px}
+select,input[type=number]{font:inherit;color:inherit;background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:7px 9px}
+input[type=range]{accent-color:var(--accent);width:100%}
+.btn{font:inherit;border:1px solid var(--line);background:var(--panel);color:inherit;border-radius:9px;padding:8px 12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;justify-content:center}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+.btn.primary:hover{filter:brightness(1.05)}
+.btn.sm{padding:4px 9px;font-size:12px;border-radius:7px}
+.btn.on{background:var(--ink);color:var(--panel);border-color:var(--ink)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.pulse{animation:glow 1.4s infinite}
+@keyframes glow{50%{box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 30%,transparent)}}
+.row{display:flex;gap:6px}
+.row>*{flex:1}
+.linkbtn{background:none;border:0;color:var(--accent);cursor:pointer;font:inherit;padding:0}
+.linkbtn:hover{text-decoration:underline}
+
+.center{display:flex;flex-direction:column;min-width:0;min-height:0}
+.toolbar{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--line);flex-wrap:wrap;background:var(--panel)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.seg button{font:inherit;color:inherit;background:none;border:0;padding:6px 11px;cursor:pointer}
+.seg button.on{background:var(--ink);color:var(--panel)}
+.mockctl{display:flex;gap:6px;align-items:center;font-size:12px;color:var(--muted)}
+.mockctl select,.mockctl input{padding:4px 6px;font-size:12px}
+.mockctl input{width:58px}
+.shirts{display:flex;gap:5px;align-items:center;margin-left:auto;flex-wrap:wrap}
+.shirts span{font-size:12px;color:var(--muted);margin-right:3px}
+.chip{width:22px;height:22px;border-radius:50%;border:1px solid rgba(0,0,0,.15);cursor:pointer;padding:0;display:inline-block;position:relative;flex:none}
+.chip.on{outline:2px solid var(--accent);outline-offset:2px}
+.chip input{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer}
+.brushbar{display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid var(--line);background:var(--soft);flex-wrap:wrap;font-size:12.5px}
+.brushbar .pal{display:flex;gap:6px;align-items:center}
+.brushbar .chip{width:26px;height:26px}
+.brushbar .chip.erase{background:repeating-linear-gradient(45deg,#fff 0 4px,#f0a 4px 8px)}
+.brushbar input[type=range]{width:120px}
+.brushbar .muted{color:var(--muted)}
+.viewport{flex:1;position:relative;overflow:hidden;cursor:grab;touch-action:none;background:
+  repeating-conic-gradient(var(--soft) 0 25%, transparent 0 50%) 0 0/20px 20px}
+.viewport.drag{cursor:grabbing}
+.viewport.painting{cursor:none}
+.stage{position:absolute;left:0;top:0;transform-origin:0 0;box-shadow:var(--shadow)}
+.stage.mock{box-shadow:none;background:transparent!important}
+.stage img,.stage .vec,.stage .mockup,.stage canvas{position:absolute;inset:0;width:100%;height:100%;user-select:none;-webkit-user-drag:none}
+.stage img{object-fit:contain}
+.stage #chk,.stage canvas{pointer-events:none}
+.stage canvas{image-rendering:pixelated}
+.stage .vec svg,.stage .mockup svg{width:100%;height:100%;display:block}
+.stage.outline .vec path{fill:none!important;stroke:var(--accent);stroke-width:1px;vector-effect:non-scaling-stroke}
+.wipe{position:absolute;top:0;bottom:0;width:0;z-index:5}
+.wipe::before{content:"";position:absolute;top:0;bottom:0;left:calc(-1px * var(--iz,1));width:calc(2px * var(--iz,1));background:var(--accent)}
+.wipe i{position:absolute;top:50%;left:-15px;width:30px;height:30px;margin-top:-15px;border-radius:50%;background:var(--accent);cursor:ew-resize;box-shadow:0 2px 8px rgba(0,0,0,.25);transform:scale(var(--iz,1))}
+.wipe i::after{content:"‹ ›";color:#fff;font-style:normal;font-weight:700;position:absolute;inset:0;display:grid;place-items:center;font-size:13px;letter-spacing:-1px}
+.tag{position:absolute;top:10px;padding:3px 8px;font-size:11px;border-radius:6px;background:rgba(0,0,0,.6);color:#fff;z-index:4;pointer-events:none;transform:scale(var(--iz,1));transform-origin:top left}
+#tagR{transform-origin:top right}
+.mocknote{position:absolute;left:12px;bottom:12px;z-index:6;font-size:12px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:5px 9px;max-width:60%}
+.mocknote.bad{border-color:#d33;color:#d33}
+.products{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.prod{display:flex;align-items:center;gap:8px;padding:8px 9px;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:inherit;font:inherit;font-size:13px;cursor:pointer;text-align:left}
+.prod svg{width:22px;height:22px;flex:none;opacity:.8}
+.prod.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset;font-weight:600}
+#prodOpts{margin-top:10px}
+#prodOpts:empty{display:none}
+.segw{display:flex;flex-wrap:wrap;gap:4px}
+.segw button{flex:1 1 auto;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:inherit;font:inherit;font-size:12px;cursor:pointer}
+.segw button.on{border-color:var(--accent);background:var(--accent);color:#fff}
+.pcolor{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:13px;margin:8px 0}
+.pcolor input{width:44px;height:28px;padding:0;border:1px solid var(--line);border-radius:6px;background:none}
+.pcolors{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pinfo{font-size:12.5px;margin:10px 0 8px;color:var(--muted)}
+.pinfo b{color:var(--text,inherit)}
+#mCutL{display:none;align-items:center;gap:5px;cursor:pointer}
+#mCutL input{width:auto;margin:0}
+body:not([data-product=textil]) #mCutL{display:flex}
+body:not([data-product=textil]) #mSide, body:not([data-product=textil]) #mSize, body:not([data-product=textil]) #mOffL,
+body:not([data-product=textil]) #shirts, body:not([data-product=textil]) #ubSec{display:none}
+body[data-product=textil] .prodonly{display:none}
+body:not([data-product=textil]) .textilonly{display:none}
+.cursor{position:absolute;border:1.5px solid #fff;outline:1px solid rgba(0,0,0,.6);border-radius:50%;pointer-events:none;z-index:9;transform:translate(-50%,-50%)}
+.empty{position:absolute;inset:0;display:grid;place-items:center;color:var(--muted);text-align:center;padding:20px}
+.empty svg{width:56px;height:56px;opacity:.5;margin-bottom:8px}
+.restore{margin-top:16px;display:inline-flex;max-width:100%;gap:10px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;color:var(--ink);text-align:left}
+.restore img{width:44px;height:44px;object-fit:contain;border-radius:8px;background:#fff;border:1px solid var(--line)}
+.busy{position:absolute;inset:0;background:color-mix(in srgb,var(--bg) 70%,transparent);display:none;place-items:center;z-index:10;backdrop-filter:blur(2px)}
+.busy.show{display:grid}
+.spinner{width:34px;height:34px;border:3px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 10px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.zoomctl{position:absolute;right:12px;bottom:12px;display:flex;gap:4px;z-index:6}
+.zoomctl .btn{padding:5px 10px;background:var(--panel)}
+.toast{position:absolute;left:50%;top:14px;transform:translateX(-50%);background:var(--ink);color:var(--panel);padding:6px 12px;border-radius:8px;font-size:12.5px;z-index:12;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.show{opacity:1}
+
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.stat{background:var(--soft);border-radius:9px;padding:8px 10px}
+.stat b{display:block;font-size:17px;font-variant-numeric:tabular-nums}
+.stat span{font-size:11px;color:var(--muted)}
+.pc{border-radius:10px;padding:10px 11px;font-size:12.5px;border:1px solid var(--line)}
+.pc.ok{background:var(--ok-bg);border-color:transparent;color:var(--ok)}
+.pc.bad{background:var(--warn-bg);border-color:transparent;color:var(--warn)}
+.pc b{display:block;font-size:13.5px;margin-bottom:2px}
+.pc ul{margin:6px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:3px}
+.pc li{display:flex;gap:6px;align-items:center}
+.pc li i{width:11px;height:11px;border-radius:3px;border:1px solid rgba(0,0,0,.2);flex:none}
+.pcctl{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.pcctl .r{display:flex;gap:8px;align-items:center;font-size:12.5px}
+.pcctl input[type=number]{width:72px;padding:4px 6px}
+.legend{display:flex;gap:12px;font-size:11.5px;color:var(--muted)}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+.layers{display:flex;flex-direction:column;gap:6px}
+.layer{border:1px solid var(--line);border-radius:10px;padding:7px}
+.layer.off{opacity:.45}
+.layer .top{display:flex;align-items:center;gap:9px}
+.sw{width:30px;height:30px;border-radius:7px;border:1px solid rgba(0,0,0,.15);position:relative;overflow:hidden;flex:none}
+.sw input{position:absolute;inset:-6px;width:calc(100% + 12px);height:calc(100% + 12px);opacity:0;cursor:pointer}
+.layer .meta{flex:1;min-width:0}
+.layer .hex{font-family:ui-monospace,monospace;font-size:13px}
+.layer .sub{font-size:11px;color:var(--muted)}
+.layer .pms{display:flex;align-items:center;gap:6px;margin-top:6px;font-size:11.5px;color:var(--muted);flex-wrap:wrap}
+.layer .pms .pd{width:12px;height:12px;border-radius:3px;border:1px solid rgba(0,0,0,.15)}
+.layer .pms.ok{color:var(--ok)}
+.layer .mergebox{margin-top:6px;display:flex;gap:6px;align-items:center;font-size:12px}
+.layer .mergebox select{flex:1;padding:4px 6px;font-size:12px}
+.badge{font-size:10px;background:var(--soft);border:1px solid var(--line);border-radius:5px;padding:0 5px;margin-left:4px;color:var(--muted);font-family:system-ui,Roboto,sans-serif}
+.badge.ub{background:var(--ink);color:var(--panel);border-color:var(--ink)}
+.badge.warn{background:var(--warn-bg);color:var(--warn);border-color:transparent}
+.ic{background:none;border:0;color:var(--muted);cursor:pointer;padding:4px;border-radius:6px;display:inline-grid;place-items:center}
+.ic:hover{color:var(--ink);background:var(--soft)}
+.ic:disabled{opacity:.3;cursor:default;background:none}
+.warn{background:var(--warn-bg);color:var(--warn);border-radius:10px;padding:9px 11px;font-size:12.5px}
+#warnings{display:flex;flex-direction:column;gap:6px}
+#warnings:empty{display:none}
+.dl{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.dl .wide{grid-column:1/-1}
+.fmts{display:flex;flex-wrap:wrap;gap:4px 12px;margin:4px 0 8px;font-size:12.5px}
+.fmts label{display:flex;gap:5px;align-items:center;cursor:pointer}
+.fmts input{accent-color:var(--accent)}
+.hint{font-size:12px;color:var(--muted);margin:6px 0 0}
+.hidden{display:none!important}
+/* ---------- Hilfe, Einführung, Erste Schritte */
+.hq{width:18px;height:18px;border-radius:50%;border:1px solid var(--line);background:var(--panel);color:var(--muted);font:600 11px/1 inherit;cursor:pointer;padding:0;display:inline-grid;place-items:center;flex:none;margin-right:auto;margin-left:6px;text-transform:none;letter-spacing:0}
+.hq:hover{color:var(--accent);border-color:var(--accent)}
+dialog.tour{width:min(460px,92vw)}
+.tour-art{background:color-mix(in srgb,var(--accent) 10%,var(--soft));border-bottom:1px solid var(--line);display:grid;place-items:center;padding:18px 10px;border-radius:14px 14px 0 0}
+.tour-art svg{width:220px;height:120px;max-width:100%}
+.tour-body{padding:16px 20px 6px}
+.tour-step{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.tour-body h3{margin:4px 0 8px;font-size:19px}
+.tour-body p{margin:0 0 10px;color:var(--ink);font-size:14px;line-height:1.55}
+.tour-body ul{margin:0 0 10px;padding-left:18px;font-size:13.5px;line-height:1.55}
+.tour-body .tip{background:var(--soft);border-radius:10px;padding:8px 11px;font-size:12.5px;color:var(--muted)}
+.tour-foot{display:flex;align-items:center;gap:8px;padding:12px 20px 18px}
+.dots{display:flex;gap:5px;margin-right:auto}
+.dots i{width:7px;height:7px;border-radius:50%;background:var(--line)}
+.dots i.on{background:var(--accent);width:18px;border-radius:4px}
+dialog.help{width:min(720px,94vw);max-height:88vh;display:none;flex-direction:column}
+dialog.help[open]{display:flex}
+.help-head{display:flex;align-items:center;gap:10px;padding:14px 16px 10px;border-bottom:1px solid var(--line)}
+.help-head h3{margin:0;font-size:17px;flex:1}
+.help-nav{display:flex;gap:6px;padding:10px 16px;border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none}
+.help-nav button{flex:none}
+.help-body{overflow:auto;padding:6px 18px 22px;font-size:14px;line-height:1.55}
+.help-body h4{font-size:15px;margin:22px 0 8px;scroll-margin-top:10px}
+.help-body ol,.help-body ul{padding-left:20px;margin:6px 0}
+.help-body li{margin:3px 0}
+.help-body dl{margin:0}
+.help-body dt{font-weight:700;margin-top:12px;scroll-margin-top:10px}
+.help-body dd{margin:2px 0 0;color:var(--muted)}
+.help-body details{border:1px solid var(--line);border-radius:10px;padding:9px 12px;margin:8px 0;background:var(--panel)}
+.help-body summary{cursor:pointer;font-weight:600}
+.help-body details p{margin:8px 0 2px;color:var(--muted)}
+.help-body .flash{animation:flash 1.6s}
+@keyframes flash{0%,40%{background:color-mix(in srgb,var(--accent) 22%,transparent);border-radius:6px}}
+.steps{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px}
+.steps h2{margin-bottom:6px}
+.steps ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.steps li{display:flex;gap:10px;align-items:center;padding:6px 6px;border-radius:8px;cursor:pointer;font-size:13.5px}
+.steps li:hover{background:var(--soft)}
+.steps li i{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--line);flex:none;display:grid;place-items:center;font-style:normal;font-size:11px;font-weight:700;color:var(--muted)}
+.steps li.done{color:var(--muted);text-decoration:line-through}
+.steps li.done i{background:var(--ok);border-color:var(--ok);color:#fff}
+.steps li.next i{border-color:var(--accent);color:var(--accent)}
+.steps li.next{font-weight:600}
+.flashbox{animation:flashbox 1.6s}
+@keyframes flashbox{0%,50%{box-shadow:0 0 0 3px var(--accent);border-radius:10px}}
+.steps .fin{font-size:13px;color:var(--ok);margin:6px 0 0}
+
+dialog{border:1px solid var(--line);border-radius:14px;background:var(--panel);color:var(--ink);padding:0;width:min(560px,92vw);box-shadow:0 20px 60px rgba(0,0,0,.3)}
+dialog::backdrop{background:rgba(0,0,0,.35)}
+dialog header{border:0;padding:16px 18px 6px;background:none}
+dialog header h3{margin:0;font-size:16px}
+.plist{max-height:60vh;overflow:auto;padding:6px 10px 14px;display:flex;flex-direction:column;gap:4px}
+.pitem{display:flex;gap:12px;align-items:center;padding:8px;border-radius:10px;cursor:pointer}
+.pitem:hover{background:var(--soft)}
+.pitem img,.pitem .ph{width:46px;height:46px;border-radius:8px;object-fit:contain;background:#fff;border:1px solid var(--line);flex:none}
+.pitem .m{flex:1;min-width:0}
+.pitem .m small{display:block;color:var(--muted);font-size:12px}
+.pempty{padding:24px;text-align:center;color:var(--muted)}
+kbd{font:11px ui-monospace,monospace;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 4px;background:var(--soft)}
+
+/* ---------- Navigation: Tabs in den Seitenleisten, Bottom-Navigation auf dem Handy */
+.ptabs{display:flex;gap:2px;background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:3px;position:sticky;top:-16px;z-index:3;margin:-4px 0 0}
+.ptabs button{flex:1;white-space:nowrap;font:inherit;font-size:13px;font-weight:600;border:0;background:none;color:var(--muted);padding:7px 8px;border-radius:7px;cursor:pointer;display:inline-flex;gap:6px;align-items:center;justify-content:center}
+.ptabs button:hover{color:var(--ink)}
+.ptabs button.on{background:var(--panel);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.cnt{min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--line);color:var(--ink);font-size:11px;font-weight:700;display:inline-grid;place-items:center;line-height:1}
+.cnt:empty{display:none}
+.cnt.warn{background:var(--warn-bg);color:var(--warn)}
+.panel{display:none;flex-direction:column;gap:18px}
+.panel.on{display:flex}
+.nores{color:var(--muted);text-align:center;padding:28px 12px;font-size:13px}
+body.has-result .nores{display:none}
+.nores .btn{margin-top:10px}
+.bnav{display:none}
+.more{display:none}
+.empty .btn{margin-top:14px}
+
+@media (max-width:1100px){
+  main{grid-template-columns:260px 1fr 290px}
+}
+@media (max-width:900px){
+  header{padding:8px 10px;gap:8px;flex-wrap:nowrap;position:relative}
+  header .sub,header h1{display:none}
+  .proj{margin-left:0;flex:1;min-width:0;gap:4px}
+  .proj input{flex:1;min-width:0;width:auto}
+  .proj .saved{display:none}
+  .more{display:inline-flex}
+  .pmenu{display:none;position:absolute;right:8px;top:calc(100% + 4px);z-index:40;flex-direction:column;align-items:stretch;gap:4px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:6px;box-shadow:0 8px 30px rgba(0,0,0,.18);min-width:190px}
+  .pmenu.open{display:flex}
+  .pmenu .btn{justify-content:flex-start;padding:10px 12px;font-size:14px;border:0}
+  .pmenu .saved{display:block;padding:4px 12px 6px;text-align:left}
+  main{display:block;position:relative;overflow:hidden}
+  main>aside,main>.center{display:none;height:100%}
+  main>aside{border:0!important;padding:14px 14px 24px;overflow:auto;background:var(--bg)}
+  main>aside .panel>section{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px}
+  main[data-tab=motive]>aside.left,main[data-tab=settings]>aside.left,main[data-tab=layers]>aside.right,main[data-tab=export]>aside.right{display:flex}
+  main[data-tab=preview]>.center{display:flex}
+  .ptabs{display:none}
+  .toolbar{flex-wrap:nowrap;overflow-x:auto;padding:8px 10px;scrollbar-width:none}
+  .toolbar::-webkit-scrollbar{display:none}
+  .toolbar>*{flex:none}
+  .toolbar{flex-wrap:wrap;overflow:visible;row-gap:8px}
+  .toolbar .shirts{order:9;width:100%;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+  .toolbar .shirts>*{flex:none}
+  .brushbar .muted:last-child{display:none}
+  .pconly{display:none}
+  .bnav{display:flex;background:var(--panel);border-top:1px solid var(--line);padding:4px 4px 6px;gap:2px}
+  .bnav button{flex:1;border:0;background:none;color:var(--muted);font:inherit;font-size:11px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0 2px;border-radius:10px;position:relative;cursor:pointer}
+  .bnav button svg{width:22px;height:22px;padding:2px 12px;box-sizing:content-box;border-radius:14px}
+  .bnav button.on{color:var(--ink)}
+  .bnav button.on svg{background:color-mix(in srgb,var(--accent) 18%,transparent);color:var(--accent)}
+  .bnav .cnt{position:absolute;top:2px;left:calc(50% + 6px);height:16px;min-width:16px;font-size:10px;background:var(--accent);color:#fff}
+  .bnav .cnt.warn{background:var(--warn);color:#fff}
+  dialog.help{width:100vw;max-width:100vw;height:100%;max-height:100%;margin:0;border-radius:0;border:0}
+  .steps{margin-bottom:0}
+}
+/* Android-App: Tippen statt Ziehen */
+html.android .pconly{display:none}
+html.android .drop strong{font-size:0}
+html.android .drop strong::after{content:"Bilder auswählen";font-size:15px}
+</style>
+</head>
+<body data-product="textil">
+<header>
+  <svg class="logo" viewBox="0 0 32 32"><path d="M4 26 16 4l12 22z" fill="#ff6a3d"/><path d="M10 26 16 15l6 11z" fill="#1b1b1d" opacity=".85"/></svg>
+  <div>
+    <h1>Vektorwerk</h1>
+    <p class="sub">Bilder rein, druckfertige Vektoren raus</p>
+  </div>
+  <div class="proj">
+    <button class="ic" id="undo" title="Rückgängig (Strg+Z)" disabled><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></svg></button>
+    <button class="ic" id="redo" title="Wiederholen (Strg+Y)" disabled><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 14 5-5-5-5"/><path d="M20 9H9a5 5 0 0 0 0 10h3"/></svg></button>
+    <input id="pname" value="Unbenanntes Projekt" title="Projektname" aria-label="Projektname">
+    <button class="ic" id="helpBtn" title="Hilfe & Anleitung" aria-label="Hilfe"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9.5"/><path d="M9.5 9.3a2.6 2.6 0 0 1 5 .9c0 1.7-2.5 2.3-2.5 3.8"/><circle cx="12" cy="17.3" r=".6" fill="currentColor"/></svg></button>
+    <button class="ic more" id="moreBtn" title="Projekt-Menü" aria-label="Projekt-Menü" aria-haspopup="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></button>
+    <div class="pmenu" id="pmenu" style="display:contents">
+      <span class="saved" id="savedInfo"></span>
+      <button class="btn sm" id="saveBtn" title="Projekt speichern (Strg+S)">Speichern</button>
+      <button class="btn sm" id="openBtn">Öffnen</button>
+      <button class="btn sm" id="newBtn" title="Neues, leeres Projekt">Neu</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <aside class="left">
+    <nav class="ptabs"><button data-tab="motive">Motive <span class="cnt" id="cntFiles"></span></button><button data-tab="settings">Einstellungen</button></nav>
+    <div class="panel" data-panel="motive">
+    <section class="steps hidden" id="steps">
+      <h2>Erste Schritte <button class="linkbtn link" id="stepsHide" title="Liste ausblenden (über die Hilfe wieder einblendbar)">Ausblenden</button></h2>
+      <ol>
+        <li data-step="load"><i>1</i>Bild laden</li>
+        <li data-step="shirt"><i>2</i>Shirtfarbe wählen</li>
+        <li data-step="check"><i>3</i>Druck-Check ansehen</li>
+        <li data-step="export"><i>4</i>Datei für die Druckerei speichern</li>
+      </ol>
+      <p class="fin hidden" id="stepsFin">Geschafft! Du kennst jetzt den ganzen Ablauf.</p>
+    </section>
+    <section>
+      <h2>Motive<button class="hq" data-help="start" title="Was ist das?">?</button></h2>
+      <label class="drop" id="drop">
+        <strong>Bilder hierher ziehen</strong>
+        <span class="pconly">oder klicken · </span>PNG, JPG, WEBP
+        <input type="file" id="pick" accept="image/*" multiple hidden>
+      </label>
+      <div class="files" id="files"></div>
+      <div id="restoreBox2"></div>
+    </section>
+    </div>
+    <div class="panel" data-panel="settings">
+
+    <section>
+      <h2>Produkt<button class="hq" data-help="produkt" title="Was ist das?">?</button></h2>
+      <div class="products" id="products"><button class="prod on" data-p="textil"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M8 3 4 5.5 2 10l3 1.5V21h14v-9.5l3-1.5-2-4.5L16 3c-.5 1.5-2 2.5-4 2.5S8.5 4.5 8 3Z"/></svg>T-Shirt & Textil</button><button class="prod" data-p="sticker"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M20 12.5V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h7.5"/><path d="M20 12.5 12.5 20c0-4 .5-7.5 7.5-7.5Z"/></svg>Sticker</button><button class="prod" data-p="patch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M12 2.5 20 6v6c0 5-3.5 8.5-8 9.5-4.5-1-8-4.5-8-9.5V6Z"/><path d="M12 5.5 17 8v4c0 3.3-2.2 5.6-5 6.4-2.8-.8-5-3.1-5-6.4V8Z" stroke-dasharray="1.5 1.5"/></svg>Aufnäher</button><button class="prod" data-p="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6.5" stroke-dasharray="1.5 1.5"/></svg>Button</button></div>
+      <div id="prodOpts"></div>
+    </section>
+
+    <section>
+      <h2>Druckverfahren<button class="hq" data-help="verfahren" title="Was ist das?">?</button></h2>
+      <div class="presets" id="presets"></div>
+    </section>
+
+    <section>
+      <h2>Feinjustierung<button class="hq" data-help="fein" title="Was ist das?">?</button></h2>
+      <div class="field">
+        <label for="colors">Farben</label>
+        <select id="colors"></select>
+      </div>
+      <div class="field">
+        <label for="smoothing">Kanten glätten <output id="smoothingV"></output></label>
+        <input type="range" id="smoothing" min="0" max="5" step="0.2">
+      </div>
+      <div class="field">
+        <label for="speckle">Kleine Flecken entfernen <output id="speckleV"></output></label>
+        <input type="range" id="speckle" min="1" max="40" step="1">
+      </div>
+      <div class="field">
+        <label for="background">Hintergrund</label>
+        <select id="background">
+          <option value="outside">Außen entfernen (empfohlen)</option>
+          <option value="all">Überall entfernen (auch in Buchstaben)</option>
+          <option value="keep">Behalten</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="width" id="widthLabel">Druckbreite (cm)</label>
+        <input type="number" id="width" min="1" max="200" step="0.5" value="28">
+      </div>
+      <div class="row">
+        <button class="btn primary" id="run" disabled>Neu berechnen</button>
+      </div>
+      <div class="row" style="margin-top:6px">
+        <button class="btn" id="runAll" disabled>Alle Motive berechnen</button>
+      </div>
+      <p class="hint">„Neu berechnen“ sucht die Farben neu und setzt Bearbeitungen am Motiv zurück. Mit <kbd>Strg</kbd>+<kbd>Z</kbd> lässt sich das rückgängig machen.</p>
+    </section>
+
+    <section id="ubSec">
+      <h2>Dunkle Shirts<button class="hq" data-help="unterleger" title="Was ist das?">?</button></h2>
+      <label class="check"><input type="checkbox" id="underbase">
+        <span>Weiß-Unterleger erzeugen<small>Weiße Grundierung unter allen Farben, damit sie auf dunklem Stoff leuchten. Wird als erster Film gedruckt.</small></span></label>
+      <div class="field" id="chokeField">
+        <label for="choke">Unterleger schrumpfen <output id="chokeV"></output></label>
+        <input type="range" id="choke" min="0" max="1.5" step="0.05" value="0.3">
+      </div>
+    </section>
+    </div>
+  </aside>
+
+  <section class="center">
+    <div class="toolbar">
+      <div class="seg" id="view">
+        <button data-v="compare" class="on">Vergleich</button>
+        <button data-v="vector">Vektor</button>
+        <button data-v="outline">Pfade</button>
+        <button data-v="mockup">Mockup</button>
+      </div>
+      <button class="btn sm" id="brushBtn" title="Flächen mit dem Pinsel umfärben oder entfernen (B)" disabled>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18.4 2.6a2 2 0 0 1 2.9 2.9L12 14.8 9.2 12z"/><path d="M9 12c-3 0-4.5 2-4.5 4.5 0 1.5-1 2.5-2.5 3 1 1 3 1.5 4.5 1.5 3 0 5.5-2.5 5.5-5.5"/></svg>
+        Nachbessern</button>
+      <div class="mockctl hidden" id="mockctl">
+        <select id="mSide" title="Seite"><option value="front">Vorne</option><option value="back">Hinten</option></select>
+        <select id="mSize" title="Größe"></select>
+        <label id="mOffL" title="Abstand Oberkante Motiv bis Kragen">↓ <input type="number" id="mOff" min="0" max="40" step="0.5" value="7"> cm</label>
+        <label id="mCutL" title="Schnittlinie in der Vorschau zeigen"><input type="checkbox" id="mCut" checked> Schnittlinie</label>
+      </div>
+      <div class="shirts" id="shirts">
+        <button class="btn sm" id="knockout" title="Ebenen ausblenden, deren Farbe der Shirtfarbe entspricht – dort scheint der Stoff durch">Shirtfarbe aussparen</button>
+        <span>Shirt</span>
+        <button class="chip" data-c="#ffffff" style="background:#fff" title="Weiß"></button>
+        <button class="chip" data-c="#141414" style="background:#141414" title="Schwarz"></button>
+        <button class="chip" data-c="#1f2a44" style="background:#1f2a44" title="Navy"></button>
+        <button class="chip" data-c="#9c9ea1" style="background:#9c9ea1" title="Grau meliert"></button>
+        <button class="chip" data-c="#7a1f2b" style="background:#7a1f2b" title="Bordeaux"></button>
+        <button class="chip" data-c="#3d5a3a" style="background:#3d5a3a" title="Oliv"></button>
+        <label class="chip" title="Eigene Farbe" style="background:conic-gradient(red,yellow,lime,cyan,blue,magenta,red)"><input type="color" id="shirtCustom"></label>
+      </div>
+    </div>
+    <div class="brushbar hidden" id="brushbar">
+      <b>Pinsel</b>
+      <div class="pal" id="brushPal"></div>
+      <label class="muted">Größe <input type="range" id="brushSize" min="4" max="160" value="28"></label>
+      <button class="btn sm" id="brushClear" title="Alle Pinselstriche dieses Motivs entfernen">Striche verwerfen</button>
+      <span class="muted">Malen = linke Maustaste · Verschieben = rechte Maustaste oder <kbd>Leertaste</kbd> · Wird nach jedem Strich übernommen</span>
+    </div>
+    <div class="viewport" id="vp">
+      <div class="empty" id="empty">
+        <div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 16l4.5-4.5a2 2 0 0 1 2.8 0L16 16m-2-2 1.5-1.5a2 2 0 0 1 2.8 0L20 14M14 8h.01M6 20h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2Z"/></svg>
+          <div><span class="pconly">Zieh ein Logo oder Motiv hier oder links hinein (oder füge es mit Strg+V ein).<br></span>Die Vektorisierung startet automatisch.</div>
+          <button class="btn primary" id="emptyPick">Bilder auswählen</button>
+          <div style="margin-top:10px"><button class="linkbtn" id="emptyTour">Wie funktioniert das? Kurze Einführung</button></div>
+          <div id="restoreBox"></div>
+        </div>
+      </div>
+      <div class="stage hidden" id="stage">
+        <img id="orig" alt="Original">
+        <div class="vec" id="vec"></div>
+        <img id="chk" alt="" class="hidden">
+        <canvas id="paint" class="hidden"></canvas>
+        <div class="mockup hidden" id="mock"></div>
+        <div class="wipe" id="wipe"><i></i></div>
+        <div class="tag" style="left:10px" id="tagL">Original</div>
+        <div class="tag" style="right:10px" id="tagR">Vektor</div>
+      </div>
+      <div class="cursor hidden" id="cursor"></div>
+      <div class="mocknote hidden" id="mocknote"></div>
+      <div class="zoomctl">
+        <button class="btn" id="zOut" title="Verkleinern">−</button>
+        <button class="btn" id="zFit" title="Einpassen">Einpassen</button>
+        <button class="btn" id="zIn" title="Vergrößern">+</button>
+      </div>
+      <div class="toast" id="toast"></div>
+      <div class="busy" id="busy"><div style="text-align:center"><div class="spinner"></div><div>Vektorisiere …</div></div></div>
+    </div>
+  </section>
+
+  <aside class="right">
+    <nav class="ptabs"><button data-tab="layers">Ebenen &amp; Prüfen <span class="cnt" id="cntCheck"></span></button><button data-tab="export">Export</button></nav>
+    <div class="panel" data-panel="layers">
+    <p class="nores">Noch kein Ergebnis. Lade ein Motiv, dann erscheinen hier Farbebenen und Druck-Check.<br><button class="btn" data-goto="motive">Zu den Motiven</button></p>
+    <section id="resultBox" class="hidden">
+      <h2>Ergebnis</h2>
+      <div class="stats" id="stats"></div>
+    </section>
+    <section id="checkBox" class="hidden">
+      <h2>Druck-Check<button class="hq" data-help="check" title="Was ist das?">?</button></h2>
+      <div id="checkRes"></div>
+      <div class="pcctl">
+        <div class="r">Mindeststärke <input type="number" id="minMm" min="0.1" max="5" step="0.05"> mm
+          <label class="check" style="margin:0 0 0 auto"><input type="checkbox" id="showChk" checked> Markieren</label></div>
+        <label class="check" style="margin:0"><input type="checkbox" id="fixThin">
+          <span>Dünne Stellen automatisch verdicken<small>Linien unter der Mindeststärke werden auf druckbare Breite gebracht.</small></span></label>
+        <div class="legend"><span><i style="background:#ff2828"></i>zu dünn</span><span><i style="background:#1478ff"></i>Lücke zu eng (läuft zu)</span></div>
+      </div>
+    </section>
+    <div id="warnings"></div>
+    <section id="layerBox" class="hidden">
+      <h2>Farbebenen<button class="hq" data-help="ebenen" title="Was ist das?">?</button> <span><button class="linkbtn link" id="allPms" title="Alle Farben auf den nächsten Pantone-Ton setzen">Alle → Pantone</button>
+        <button class="linkbtn link hidden" id="unmerge" title="Zusammengelegte Farben wieder trennen">· Trennen</button></span></h2>
+      <div class="layers" id="layers"></div>
+      <p class="hint">Farbfeld = Farbe ändern · <b>⇲</b> = mit anderer Farbe zusammenlegen · Auge = nicht drucken.
+        Pantone-Werte sind Bildschirm-Näherungen (Solid Coated). Verbindlich ist der Farbfächer.</p>
+    </section>
+    </div>
+    <div class="panel" data-panel="export">
+    <p class="nores">Sobald ein Motiv berechnet ist, kannst du es hier als PDF, SVG, EPS, PNG oder Siebdruck-Filme speichern.<br><button class="btn" data-goto="motive">Zu den Motiven</button></p>
+    <section id="dlBox" class="hidden">
+      <h2>Herunterladen<button class="hq" data-help="export" title="Was ist das?">?</button></h2>
+      <div class="dl">
+        <button class="btn primary" data-f="pdf">PDF</button>
+        <button class="btn primary" data-f="svg">SVG</button>
+        <button class="btn" data-f="eps">EPS</button>
+        <button class="btn" data-f="png">PNG 300 dpi</button>
+        <button class="btn wide textilonly" data-f="films">Siebdruck-Filme (PDF, 1 Seite pro Farbe)</button>
+        <button class="btn prodonly" data-f="cut" title="Nur die Schnittlinie – für Schneideplotter (Cricut, Silhouette, Summa)">Schnittlinie SVG</button>
+        <button class="btn prodonly" data-f="cutpdf" title="Nur die Schnittlinie als PDF">Schnittlinie PDF</button>
+      </div>
+      <p class="hint">Für die Druckerei: <b>PDF</b> oder <b>EPS</b>. Siebdruck: zusätzlich die <b>Filme</b> mit Passkreuzen.
+        Zum Weiterbearbeiten: <b>SVG</b> (jede Farbe eine Ebene).</p>
+    </section>
+    <section id="zipBox" class="hidden">
+      <h2>Alle Motive als ZIP<button class="hq" data-help="export" title="Was ist das?">?</button></h2>
+      <div class="fmts" id="zipFmts">
+        <label><input type="checkbox" value="pdf" checked> PDF</label>
+        <label><input type="checkbox" value="svg" checked> SVG</label>
+        <label><input type="checkbox" value="eps"> EPS</label>
+        <label><input type="checkbox" value="png"> PNG</label>
+        <label><input type="checkbox" value="films" checked> Filme</label>
+      </div>
+      <button class="btn" id="zipBtn" style="width:100%">ZIP herunterladen</button>
+    </section>
+    </div>
+  </aside>
+</main>
+
+<nav class="bnav" id="bnav" aria-label="Navigation">
+  <button data-tab="motive"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="m3 16 5-5 4 4 3-3 6 6"/><circle cx="15.5" cy="8.5" r="1.5"/></svg>Motive<span class="cnt" id="bnFiles"></span></button>
+  <button data-tab="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>Einstellen</button>
+  <button data-tab="preview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3 3 19h18z"/><path d="m12 11-3.5 8h7z"/></svg>Vorschau</button>
+  <button data-tab="layers"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/></svg>Ebenen<span class="cnt" id="bnCheck"></span></button>
+  <button data-tab="export"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11m-4-4 4 4 4-4"/><path d="M5 19h14"/></svg>Export</button>
+</nav>
+
+<dialog id="tourDlg" class="tour" aria-labelledby="tourTitle">
+  <div class="tour-art" id="tourArt"></div>
+  <div class="tour-body">
+    <div class="tour-step" id="tourStep"></div>
+    <h3 id="tourTitle"></h3>
+    <div id="tourText"></div>
+  </div>
+  <div class="tour-foot">
+    <div class="dots" id="tourDots"></div>
+    <button class="btn" id="tourBack">Zurück</button>
+    <button class="btn primary" id="tourNext">Weiter</button>
+  </div>
+</dialog>
+
+<dialog id="helpDlg" class="help" aria-label="Hilfe">
+  <div class="help-head">
+    <h3>Hilfe &amp; Anleitung</h3>
+    <button class="ic" id="helpClose" title="Schließen" aria-label="Schließen"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+  </div>
+  <div class="help-nav">
+    <button class="btn sm" data-jump="h-start">So geht's</button>
+    <button class="btn sm" data-jump="h-begriffe">Begriffe</button>
+    <button class="btn sm" data-jump="h-faq">Häufige Fragen</button>
+    <button class="btn sm" id="helpTour">Einführung ansehen</button>
+  </div>
+  <div class="help-body">
+    <h4 id="h-start">So geht's – in 5 Schritten</h4>
+    <ol>
+      <li><b>Bild laden</b> – „Bilder auswählen“ antippen oder ein Bild hineinziehen. Die App rechnet sofort los.</li>
+      <li><b>Druckverfahren wählen</b> – meist <b>Siebdruck</b>. Für Bügel- oder Plotterfolie <b>Flex/Flock</b>, für Fotos und Verläufe <b>DTF</b>.</li>
+      <li><b>Shirtfarbe wählen</b> – Farben, die so aussehen wie der Stoff, werden automatisch weggelassen.</li>
+      <li><b>Prüfen</b> – unter „Ebenen &amp; Prüfen“ siehst du jede Druckfarbe einzeln. Der Druck-Check zeigt zu feine Stellen.</li>
+      <li><b>Speichern</b> – unter „Export“ das <b>PDF</b> für die Druckerei speichern. Beim Siebdruck zusätzlich die <b>Filme</b>.</li>
+    </ol>
+    <p class="hint">Dein Bild bleibt auf deinem Gerät. Nichts wird ins Internet hochgeladen.</p>
+
+    <h4 id="h-begriffe">Begriffe kurz erklärt</h4>
+    <dl>
+      <dt id="h-vektor">Vektor / Vektordatei</dt>
+      <dd>Ein Bild aus Linien und Flächen statt aus Pixeln. Es bleibt in jeder Größe gestochen scharf – deshalb wollen Druckereien Vektordateien (PDF, EPS, SVG).</dd>
+      <dt id="h-verfahren">Druckverfahren</dt>
+      <dd><b>Siebdruck:</b> klassischer Textildruck, jede Farbe wird mit einem eigenen Sieb gedruckt. Günstig ab mittleren Stückzahlen, sehr haltbar.<br>
+          <b>Flex / Flock (Plotter):</b> Farbfolie wird ausgeschnitten und aufgebügelt. Gut für einfache Motive mit wenigen Farben und kleine Stückzahlen.<br>
+          <b>DTF / Digitaldruck:</b> wird gedruckt wie auf Papier. Viele Farben und Details sind möglich, auch Fotos.<br>
+          <b>Maximale Details:</b> für Illustrationen mit vielen Farben.</dd>
+      <dt id="h-sieb">Sieb / Film</dt>
+      <dd>Im Siebdruck braucht jede Farbe ein eigenes Sieb. Dafür belichtet die Druckerei einen schwarzen „Film“ pro Farbe. Weniger Farben bedeuten weniger Siebe und einen günstigeren Druck.</dd>
+      <dt id="h-aussparen">Shirtfarbe aussparen</dt>
+      <dd>Ist ein Teil des Motivs so schwarz wie ein schwarzes Shirt, muss er nicht gedruckt werden – dort scheint einfach der Stoff durch. Das spart ein Sieb. Die App macht das automatisch, sobald du die Shirtfarbe wählst.</dd>
+      <dt id="h-unterleger">Weiß-Unterleger</dt>
+      <dd>Bunte Farben wirken auf dunklem Stoff blass. Ein Unterleger ist eine weiße Grundschicht unter den Farben, damit sie leuchten. „Schrumpfen“ macht ihn etwas kleiner, damit an den Rändern kein Weiß hervorblitzt.</dd>
+      <dt id="h-fein">Feinjustierung</dt>
+      <dd><b>Farben:</b> wie viele Druckfarben es werden sollen („Automatisch“ passt meistens).<br>
+          <b>Kanten glätten:</b> höher = rundere, ruhigere Kanten. Niedriger = mehr Details, aber auch mehr Unruhe.<br>
+          <b>Kleine Flecken entfernen:</b> entfernt Staub und Krümel aus dem Bild. Zu hoch, und auch kleine Details verschwinden.<br>
+          <b>Hintergrund:</b> „Außen entfernen“ wirft die Fläche um das Motiv weg. „Überall“ auch Löcher in Buchstaben wie bei O oder A.<br>
+          <b>Druckbreite:</b> wie breit das Motiv auf dem Shirt wird. Richtwerte: Brust 8–10 cm, Rücken 25–30 cm, Ärmel 6–8 cm.</dd>
+      <dt id="h-check">Druck-Check</dt>
+      <dd>Zeigt Stellen, die zu fein für den Druck sind. <b style="color:#ff2828">Rot</b> = Linie zu dünn, sie kann wegbrechen. <b style="color:#1478ff">Blau</b> = Lücke zu eng, sie läuft im Druck zu. Abhilfe: „Dünne Stellen automatisch verdicken“ anhaken oder das Motiv größer drucken.</dd>
+      <dt id="h-ebenen">Farbebenen</dt>
+      <dd>Jede Druckfarbe ist eine Ebene. Antippen des Farbfelds ändert die Farbe, <b>⇲</b> legt zwei ähnliche Farben zusammen, das Auge blendet eine Farbe aus (wird dann nicht gedruckt).</dd>
+      <dt id="h-pantone">Pantone</dt>
+      <dd>Ein weltweit genutztes Farbsystem. Mit der Pantone-Nummer weiß die Druckerei genau, welche Farbe gemeint ist. Am Bildschirm sind das Näherungen – verbindlich ist der gedruckte Farbfächer.</dd>
+      <dt id="h-ansichten">Ansichten</dt>
+      <dd><b>Vergleich:</b> Original und Vektor nebeneinander, den Schieber ziehen.<br>
+          <b>Vektor:</b> nur das Ergebnis. <b>Pfade:</b> zeigt die Umrisslinien.<br>
+          <b>Mockup / Produkt:</b> wie das Motiv auf dem Shirt, als Sticker, Aufnäher oder Button aussieht.<br>
+          <b>Nachbessern:</b> mit dem Pinsel Flächen umfärben oder wegradieren.</dd>
+      <dt id="h-produkt">Produkt: Shirt, Sticker, Aufnäher, Button</dt>
+      <dd>Oben in den Einstellungen wählst du, <b>was</b> gedruckt wird. Vektorwerk baut dann die passende Druckdatei:<br>
+          <b>Sticker:</b> Form (Kontur ums Motiv, Kreis, Rechteck), Hintergrundfarbe oder transparente Folie.<br>
+          <b>Aufnäher:</b> Stoffform mit gesticktem Rand in eigener Farbe.<br>
+          <b>Button:</b> runde Vorlage mit Umschlag für die Buttonmaschine.<br>
+          Die Ansicht <b>Produkt</b> zeigt, wie es fertig aussieht.</dd>
+      <dt id="h-schnitt">Schnittlinie (CutContour)</dt>
+      <dd>Die Linie, an der Sticker oder Aufnäher ausgeschnitten werden. Sie liegt als eigene Ebene „CutContour“ in Magenta in der Datei – so erkennen Druckereien und Schneideplotter sie automatisch. Sie wird nicht mitgedruckt. Für Cricut, Silhouette & Co. gibt es sie einzeln als „Schnittlinie SVG“.</dd>
+      <dt id="h-beschnitt">Beschnitt</dt>
+      <dd>Die Hintergrundfarbe läuft ein paar Millimeter über die Schnittlinie hinaus. Schneidet die Maschine minimal daneben, bleibt trotzdem kein weißer Blitzer am Rand. Üblich: 1–3 mm.</dd>
+      <dt id="h-export">Dateiformate</dt>
+      <dd><b>PDF</b> – die beste Wahl für die Druckerei. <b>EPS</b> – falls die Druckerei danach fragt.<br>
+          <b>SVG</b> – zum Weiterbearbeiten, z. B. in Inkscape oder Illustrator. <b>PNG</b> – normales Bild mit 300 dpi, z. B. für DTF oder Vorschauen.<br>
+          <b>Siebdruck-Filme</b> – ein Blatt pro Farbe, mit Passkreuzen. <b>ZIP</b> – alle Motive auf einmal.<br>
+          <b>Schnittlinie SVG/PDF</b> – nur die Schneidekontur, für Sticker, Aufnäher und Buttons.</dd>
+    </dl>
+
+    <h4 id="h-faq">Häufige Fragen</h4>
+    <details><summary>Welche Datei schicke ich der Druckerei?</summary>
+      <p>Das <b>PDF</b>. Beim Siebdruck freuen sich viele Druckereien zusätzlich über die <b>Siebdruck-Filme</b>. Bist du unsicher, frag nach dem gewünschten Format – PDF und EPS gehen fast immer.</p></details>
+    <details><summary>Ich will Sticker drucken lassen – welche Datei?</summary>
+      <p>In den Einstellungen <b>Sticker</b> wählen, Form und Abstand einstellen und das <b>PDF</b> herunterladen. Darin sind Druckbild, Beschnitt und die Schnittlinie „CutContour“ – das ist der Standard bei Sticker-Druckereien. Zum Selbstplotten zusätzlich „Schnittlinie SVG“ nehmen.</p></details>
+    <details><summary>Wo finde ich die gespeicherten Dateien?</summary>
+      <p>Am PC im Download-Ordner deines Browsers. Auf dem Handy im Ordner <b>Download/Vektorwerk</b> (Dateien-App).</p></details>
+    <details><summary>Welches Bild eignet sich am besten?</summary>
+      <p>Möglichst groß und scharf, gerade fotografiert oder gescannt, mit gleichmäßigem Hintergrund. Logos und Grafiken mit klaren Farben klappen am besten. Fotos von Personen eignen sich nur für DTF.</p></details>
+    <details><summary>Warum fehlen feine Details?</summary>
+      <p>Sehr feine Linien lassen sich nicht sauber drucken und werden geglättet. Wähle „Maximale Details“, stell „Kanten glätten“ niedriger und „Kleine Flecken entfernen“ auf 1. Ein größeres Ausgangsbild hilft auch.</p></details>
+    <details><summary>Es sind zu viele (oder zu wenige) Farben.</summary>
+      <p>Unter „Einstellungen → Farben“ eine feste Anzahl wählen und „Neu berechnen“ antippen. Oder bei „Ebenen“ ähnliche Farben mit <b>⇲</b> zusammenlegen.</p></details>
+    <details><summary>Der Hintergrund wird mitgedruckt.</summary>
+      <p>Bei „Hintergrund“ „Außen entfernen“ oder „Überall entfernen“ wählen. Oder die Hintergrund-Ebene mit dem Auge ausblenden.</p></details>
+    <details><summary>Was bedeuten die roten und blauen Markierungen?</summary>
+      <p>Rot = zu dünn, Blau = Lücke zu eng. Der Haken „Dünne Stellen automatisch verdicken“ löst das meistens. Alternativ das Motiv etwas größer drucken.</p></details>
+    <details><summary>Ich habe mich vertan – wie mache ich das rückgängig?</summary>
+      <p>Mit dem Pfeil oben links (↶). Am PC auch mit <kbd>Strg</kbd>+<kbd>Z</kbd>. Bis zu 50 Schritte pro Motiv.</p></details>
+    <details><summary>Wie speichere ich meine Arbeit?</summary>
+      <p>„Speichern“ (am Handy hinter ⋮) legt ein Projekt an, das du mit „Öffnen“ wieder lädst. Zusätzlich wird automatisch gesichert – beim nächsten Start kannst du die letzte Sitzung wiederherstellen.</p></details>
+    <p style="margin-top:16px"><button class="btn sm" id="stepsShow">„Erste Schritte“-Liste wieder einblenden</button></p>
+  </div>
+</dialog>
+
+<dialog id="openDlg">
+  <header><h3>Projekt öffnen</h3></header>
+  <div class="plist" id="plist"></div>
+  <div style="padding:0 18px 16px;text-align:right"><button class="btn sm" id="dlgClose">Schließen</button></div>
+</dialog>
+
+<script>
+const $ = s => document.querySelector(s);
+const state = { presets: {}, preset: 'siebdruck', files: [], cur: null, view: 'compare', wipe: 0.5,
+                zoom: 1, pan: {x: 0, y: 0}, shirt: '#ffffff', pantone: [],
+                tool: null, brushCode: null, space: false,
+                projectId: null, dirty: false };
+let uid = 0;
+
+// ================================================================ Farbmathe
+function hexToRgb(h) { h = h.replace('#', ''); return [0, 2, 4].map(i => parseInt(h.slice(i, i + 2), 16)); }
+function rgbToLab([r, g, b]) {
+  const f = c => { c /= 255; return c > 0.04045 ? ((c + 0.055) / 1.055) ** 2.4 : c / 12.92; };
+  const R = f(r), G = f(g), B = f(b);
+  let x = (R * 0.4124 + G * 0.3576 + B * 0.1805) / 0.95047, y = R * 0.2126 + G * 0.7152 + B * 0.0722,
+      z = (R * 0.0193 + G * 0.1192 + B * 0.9505) / 1.08883;
+  const t = v => v > 0.008856 ? Math.cbrt(v) : 7.787 * v + 16 / 116;
+  x = t(x); y = t(y); z = t(z);
+  return [116 * y - 16, 500 * (x - y), 200 * (y - z)];
+}
+const lab = h => rgbToLab(hexToRgb(h));
+function dE00(a, b) {  // CIEDE2000
+  const [L1, a1, b1] = a, [L2, a2, b2] = b, rad = Math.PI / 180;
+  const C1 = Math.hypot(a1, b1), C2 = Math.hypot(a2, b2), Cm = (C1 + C2) / 2;
+  const G = 0.5 * (1 - Math.sqrt(Cm ** 7 / (Cm ** 7 + 25 ** 7)));
+  const a1p = a1 * (1 + G), a2p = a2 * (1 + G);
+  const C1p = Math.hypot(a1p, b1), C2p = Math.hypot(a2p, b2);
+  const h = (x, y) => { const v = Math.atan2(y, x) / rad; return v < 0 ? v + 360 : v; };
+  const h1 = h(a1p, b1), h2 = h(a2p, b2);
+  const dL = L2 - L1, dC = C2p - C1p;
+  let dh = C1p * C2p === 0 ? 0 : h2 - h1; if (dh > 180) dh -= 360; else if (dh < -180) dh += 360;
+  const dH = 2 * Math.sqrt(C1p * C2p) * Math.sin(dh * rad / 2);
+  const Lm = (L1 + L2) / 2, Cmp = (C1p + C2p) / 2;
+  let hm = h1 + h2; if (C1p * C2p !== 0) hm = Math.abs(h1 - h2) > 180 ? (h1 + h2 + (h1 + h2 < 360 ? 360 : -360)) / 2 : (h1 + h2) / 2;
+  const T = 1 - 0.17 * Math.cos((hm - 30) * rad) + 0.24 * Math.cos(2 * hm * rad) + 0.32 * Math.cos((3 * hm + 6) * rad) - 0.2 * Math.cos((4 * hm - 63) * rad);
+  const Sl = 1 + 0.015 * (Lm - 50) ** 2 / Math.sqrt(20 + (Lm - 50) ** 2), Sc = 1 + 0.045 * Cmp, Sh = 1 + 0.015 * Cmp * T;
+  const Rt = -2 * Math.sqrt(Cmp ** 7 / (Cmp ** 7 + 25 ** 7)) * Math.sin(60 * Math.exp(-(((hm - 275) / 25) ** 2)) * rad);
+  return Math.sqrt((dL / Sl) ** 2 + (dC / Sc) ** 2 + (dH / Sh) ** 2 + Rt * (dC / Sc) * (dH / Sh));
+}
+function nearestPantone(hex) {
+  const l = lab(hex); let best = null, bd = 1e9;
+  for (const p of state.pantone) { const d = dE00(l, p.lab); if (d < bd) { bd = d; best = p; } }
+  return best && { ...best, dE: bd };
+}
+const isWhite = h => h.toUpperCase() === '#FFFFFF';
+const layerHex = (f, pi) => { const l = f.result.layers.find(x => x.pi === pi); return ((f.edits[pi] || {}).hex || (l ? l.hex : f.palette[pi]) || '#000').toUpperCase(); };
+
+// ================================================================ Einstellungen
+async function init() {
+  const [presets, pms] = await Promise.all([fetch('/api/presets').then(r => r.json()),
+                                            fetch('/static/pantone.json').then(r => r.json()).catch(() => ({}))]);
+  state.presets = presets;
+  state.pantone = Object.entries(pms).map(([k, hex]) => ({ name: `PANTONE ${k} C`, hex, lab: lab(hex) }));
+  state.pantone.push({ name: 'PANTONE Black C', hex: '#2D2926', lab: lab('#2D2926') });
+  const box = $('#presets');
+  for (const [k, p] of Object.entries(presets)) {
+    const b = document.createElement('button');
+    b.className = 'preset'; b.dataset.k = k;
+    b.innerHTML = `<b>${esc(p.label)}</b><span>${esc(p.hint)}</span>`;
+    b.onclick = () => setPreset(k, true);
+    box.append(b);
+  }
+  for (const s of Object.keys(SIZES)) $('#mSize').insertAdjacentHTML('beforeend', `<option${s === 'L' ? ' selected' : ''}>${s}</option>`);
+  setPreset('siebdruck', false);
+  offerRestore();
+}
+
+function setPreset(k, markDirty) {
+  state.preset = k;
+  const p = state.presets[k];
+  document.querySelectorAll('.preset').forEach(b => b.classList.toggle('on', b.dataset.k === k));
+  const sel = $('#colors'); sel.innerHTML = '<option value="0">Automatisch</option>';
+  for (let i = 1; i <= p.max_colors; i++) sel.insertAdjacentHTML('beforeend', `<option value="${i}">${i}</option>`);
+  $('#smoothing').value = p.smoothing; $('#speckle').value = p.speckle;
+  syncOutputs();
+  if (markDirty) changed();
+}
+
+function syncOutputs() {
+  $('#smoothingV').textContent = (+$('#smoothing').value).toFixed(1);
+  $('#speckleV').textContent = $('#speckle').value + ' px';
+  $('#chokeV').textContent = (+$('#choke').value).toFixed(2).replace('.', ',') + ' mm';
+  $('#chokeField').classList.toggle('hidden', !$('#underbase').checked);
+}
+
+function settings() {
+  return { preset: state.preset, colors: $('#colors').value, smoothing: $('#smoothing').value,
+           speckle: $('#speckle').value, background: $('#background').value, width_cm: $('#width').value,
+           underbase: $('#underbase').checked, choke_mm: $('#choke').value };
+}
+
+function changed() { const f = cur(); $('#run').classList.toggle('pulse', !!(f && f.result)); }
+
+['#colors', '#smoothing', '#speckle', '#background', '#width'].forEach(id =>
+  $(id).addEventListener('input', () => { syncOutputs(); changed(); }));
+$('#underbase').addEventListener('change', () => { syncOutputs(); refine(cur()); });
+$('#width').addEventListener('change', () => { const f = cur(); if (prod(f) && f.result) { f._pc = null; refine(f); } });
+$('#choke').addEventListener('input', syncOutputs);
+$('#choke').addEventListener('change', () => refine(cur()));
+
+// ================================================================ Dateien
+const drop = $('#drop');
+$('#pick').onchange = e => { addFiles(e.target.files); e.target.value = ''; };
+document.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('over'); });
+document.addEventListener('dragleave', e => { if (!e.relatedTarget) drop.classList.remove('over'); });
+document.addEventListener('drop', e => { e.preventDefault(); drop.classList.remove('over'); addFiles(e.dataTransfer.files); });
+document.addEventListener('paste', e => { const items = [...e.clipboardData.files]; if (items.length) addFiles(items); });
+
+let queue = Promise.resolve();
+const enqueue = fn => (queue = queue.then(fn).catch(console.error));
+
+function newFile(file, name) {
+  return { id: ++uid, file, name, url: URL.createObjectURL(file), status: 'idle', result: null, edits: {},
+           settings: null, palette: null, merge: null, strokes: [], fixThin: false, minMm: null, product: null,
+           hist: [], fut: [], paint: null };
+}
+
+function addFiles(list) {
+  const imgs = [...list].filter(f => f.type.startsWith('image/'));
+  if (!imgs.length) return;
+  const added = imgs.map(file => newFile(file, (file.name || 'motiv').replace(/\.[^.]+$/, '')));
+  state.files.push(...added);
+  select(added[0].id);
+  if (isMobile()) setTab('preview');
+  const s = settings();
+  for (const f of added) enqueue(() => process(f, s, 'auto'));
+}
+
+function cur() { return state.files.find(f => f.id === state.cur); }
+
+function renderFiles() {
+  const box = $('#files'); box.innerHTML = '';
+  for (const f of state.files) {
+    const d = document.createElement('div');
+    d.className = 'file' + (f.id === state.cur ? ' active' : '');
+    const n = f.result ? f.result.layers.filter(l => l.role === 'color').length : 0;
+    const ck = f.result && f.result.check && f.result.check.total ? ` · ⚠ ${f.result.check.total}` : '';
+    const info = f.status === 'busy' ? 'wird berechnet …' : f.status === 'err' ? 'Fehler' : f.result ? `${n} Farben${ck}` : 'wartet';
+    d.innerHTML = `<img src="${f.url}" alt=""><div class="n">${esc(f.name)}<div class="s">${info}</div></div>
+      <button class="ic x" title="Motiv entfernen"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+      <span class="dot ${f.status}"></span>`;
+    d.onclick = () => { select(f.id); if (isMobile()) setTab('preview'); };
+    d.querySelector('.x').onclick = ev => { ev.stopPropagation(); removeFile(f); };
+    box.append(d);
+  }
+  $('#run').disabled = !state.cur;
+  $('#runAll').disabled = state.files.length < 2;
+  $('#zipBox').classList.toggle('hidden', !state.files.some(f => f.result));
+  $('#brushBtn').disabled = !(cur() && cur().result);
+  if (state.files.length) { $('#restoreBox').innerHTML = ''; $('#restoreBox2').innerHTML = ''; }
+  const n = state.files.length || '', c = cur(), iss = c && c.result && c.result.check ? c.result.check.total : 0;
+  $('#cntFiles').textContent = $('#bnFiles').textContent = n;
+  if (typeof renderSteps === 'function') renderSteps();
+  for (const id of ['#cntCheck', '#bnCheck']) { $(id).textContent = iss || ''; $(id).classList.add('warn'); }
+}
+
+function removeFile(f) {
+  if (!confirm(`„${f.name}“ aus dem Projekt entfernen?`)) return;
+  state.files = state.files.filter(x => x !== f);
+  URL.revokeObjectURL(f.url);
+  if (state.cur === f.id) {
+    if (state.files.length) select(state.files[0].id);
+    else { state.cur = null; $('#stage').classList.add('hidden'); $('#empty').classList.remove('hidden'); renderResult(); }
+  }
+  renderFiles(); markDirty();
+}
+
+function select(id) {
+  state.cur = id; renderFiles();
+  const f = cur();
+  if (f.settings && f.settings.width_cm) $('#width').value = f.settings.width_cm;  // Breite gehört zum Motiv
+  $('#empty').classList.add('hidden'); $('#stage').classList.remove('hidden');
+  $('#orig').onload = () => fit();
+  $('#orig').src = f.url;
+  if (!f.result && state.tool) setTool(null);
+  renderProduct(); renderResult(); renderPaint(); updateUndo();
+  if (state.view === 'mockup') fit();
+  if (isMobile() && nav.tab !== 'preview') setTab('preview');
+  $('#busy').classList.toggle('show', f.status === 'busy');
+}
+
+// ================================================================ Verarbeitung
+// mode 'auto'   : Farben neu suchen (setzt Bearbeitungen und Pinselstriche zurück)
+// mode 'refine' : gleiche Palette + Zusammenlegungen + Pinsel + Unterleger, Bearbeitungen bleiben
+async function process(f, s, mode) {
+  f.status = 'busy'; f.error = null; renderFiles();
+  if (f.id === state.cur) $('#busy').classList.add('show');
+  const fd = new FormData(); fd.append('file', f.file);
+  for (const [k, v] of Object.entries(s)) fd.append(k, v);
+  if (f.minMm != null) fd.append('min_line_mm', f.minMm);
+  fd.append('fix_thin', f.fixThin);
+  if (mode === 'refine' && f.palette) {
+    fd.append('palette', JSON.stringify(f.palette));
+    fd.append('merge', JSON.stringify(f.merge));
+    fd.append('hidden', JSON.stringify(Object.entries(f.edits).filter(([k, e]) => e.hidden && +k >= 0).map(([k]) => +k)));
+    if (f.strokes.length) fd.append('paint', await paintBlob(f), 'paint.png');
+  }
+  try {
+    const r = await fetch('/api/vectorize', { method: 'POST', body: fd });
+    const j = await r.json();
+    if (!r.ok) throw new Error(j.detail || 'Fehler');
+    if (mode === 'auto') {
+      if (f.strokes.length && f.id === state.cur) toast('Neue Farbsuche – Pinselstriche wurden zurückgesetzt');
+      f.edits = {}; f.palette = j.palette; f.merge = j.palette.map((_, i) => i); f.strokes = []; f.paint = null;
+    }
+    f.result = j; f.settings = s; f.status = 'done';
+    // Shirtfarbe automatisch aussparen; danach Druck-Check/Unterleger ohne diese Ebenen neu rechnen
+    if (mode === 'auto' && autoKnockout(f)) refine(f); else commit(f);
+  } catch (e) { f.status = 'err'; f.error = e.message; }
+  renderFiles();
+  if (f.id === state.cur) { $('#busy').classList.remove('show'); renderResult(); renderPaint(); }
+}
+
+function refine(f) {
+  if (!f || !f.result) return;
+  const s = { ...f.settings, underbase: $('#underbase').checked, choke_mm: $('#choke').value, width_cm: $('#width').value };
+  enqueue(() => process(f, s, 'refine'));
+}
+
+$('#run').onclick = () => { const f = cur(); if (!f) return; $('#run').classList.remove('pulse'); const s = settings(); enqueue(() => process(f, s, 'auto')); };
+$('#runAll').onclick = () => { $('#run').classList.remove('pulse'); const s = settings(); for (const f of state.files) enqueue(() => process(f, s, 'auto')); };
+
+// ================================================================ Verlauf (Rückgängig / Wiederholen)
+function snap(f) {
+  return { edits: structuredClone(f.edits), merge: f.merge && f.merge.slice(), palette: f.palette && f.palette.slice(),
+           strokes: f.strokes.slice(), result: f.result, settings: f.settings, fixThin: f.fixThin, minMm: f.minMm };
+}
+function commit(f) {
+  if (!f.result) return;
+  f.hist.push(snap(f)); if (f.hist.length > 50) f.hist.shift();
+  f.fut = [];
+  updateUndo(); markDirty();
+}
+function restore(f, s) {
+  Object.assign(f, { edits: structuredClone(s.edits), merge: s.merge && s.merge.slice(), palette: s.palette && s.palette.slice(),
+                     strokes: s.strokes.slice(), result: s.result, settings: s.settings, fixThin: s.fixThin, minMm: s.minMm });
+  f.paint = null;
+  renderFiles(); renderResult(); renderPaint(); updateUndo(); markDirty();
+}
+function undo() { const f = cur(); if (!f || f.status === 'busy' || f.hist.length < 2) return; f.fut.push(f.hist.pop()); restore(f, f.hist.at(-1)); toast('Rückgängig'); }
+function redo() { const f = cur(); if (!f || f.status === 'busy' || !f.fut.length) return; const s = f.fut.pop(); f.hist.push(s); restore(f, s); toast('Wiederholt'); }
+function updateUndo() { const f = cur(); $('#undo').disabled = !(f && f.hist.length > 1); $('#redo').disabled = !(f && f.fut.length); }
+$('#undo').onclick = undo; $('#redo').onclick = redo;
+
+document.addEventListener('keydown', e => {
+  const typing = /^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName) && !['checkbox', 'range', 'color'].includes(e.target.type);
+  const mod = e.ctrlKey || e.metaKey;
+  if (mod && e.key.toLowerCase() === 's') { e.preventDefault(); saveProject(); return; }
+  if (typing) return;
+  if (mod && e.key.toLowerCase() === 'z' && !e.shiftKey) { e.preventDefault(); undo(); }
+  else if (mod && (e.key.toLowerCase() === 'y' || (e.key.toLowerCase() === 'z' && e.shiftKey))) { e.preventDefault(); redo(); }
+  else if (!mod && e.key.toLowerCase() === 'b' && !$('#brushBtn').disabled) setTool(state.tool ? null : 'brush');
+  else if (e.key === 'Escape' && state.tool) setTool(null);
+  else if (e.key === ' ' && state.tool) { state.space = true; e.preventDefault(); }
+  else if (state.tool && (e.key === '[' || e.key === ']')) {
+    const s = $('#brushSize'); s.value = +s.value + (e.key === ']' ? 6 : -6); updateCursorSize();
+  }
+});
+document.addEventListener('keyup', e => { if (e.key === ' ') state.space = false; });
+
+// ================================================================ SVG mit Bearbeitungen
+function editedSvg(f) {
+  const doc = new DOMParser().parseFromString(f.result.svg, 'image/svg+xml');
+  let n = 0;
+  doc.querySelectorAll('g[data-color]').forEach(g => {
+    const pi = +g.getAttribute('data-pi'), e = f.edits[pi] || {}, ub = g.getAttribute('data-role') === 'underbase';
+    if (e.hidden) { g.remove(); return; }
+    if (!ub) n++;
+    const hex = (e.hex || g.getAttribute('data-color')).toUpperCase();
+    g.setAttribute('fill', hex); g.setAttribute('data-color', hex);
+    if (e.pantone) g.setAttribute('data-pantone', e.pantone); else g.removeAttribute('data-pantone');
+    g.setAttribute('id', ub ? 'unterleger' : `farbe-${n}`);
+    g.setAttributeNS('http://www.inkscape.org/namespaces/inkscape', 'inkscape:label',
+      ub ? 'Unterleger Weiß' : `Farbe ${n} ${e.pantone || hex}`);
+  });
+  return new XMLSerializer().serializeToString(doc);
+}
+
+// ================================================================ Ergebnis-Panel
+function renderResult() {
+  const f = cur();
+  const has = !!(f && f.result);
+  document.body.classList.toggle('has-result', has);
+  if (has && !isMobile() && nav.right === 'layers' && typeof markStep === 'function') markStep('check');
+  ['#resultBox', '#layerBox', '#dlBox', '#checkBox'].forEach(id => $(id).classList.toggle('hidden', !has));
+  const w = $('#warnings'); w.innerHTML = '';
+  if (f && f.status === 'err') w.innerHTML = `<div class="warn">⚠ ${esc(f.error)}</div>`;
+  if (!has) { $('#vec').innerHTML = ''; $('#mock').innerHTML = ''; $('#chk').classList.add('hidden'); return; }
+  const r = f.result;
+  renderProdInfo();
+  for (const m of r.warnings) w.insertAdjacentHTML('beforeend', `<div class="warn">⚠ ${esc(m)}</div>`);
+  const printsColor = r.layers.some(l => l.role === 'color' && !(f.edits[l.pi] || {}).hidden && !isWhite((f.edits[l.pi] || {}).hex || l.hex));
+  if (!prod(f) && lab(state.shirt)[0] < 45 && printsColor && !r.layers.some(l => l.role === 'underbase'))
+    w.insertAdjacentHTML('beforeend', '<div class="warn">Dunkles Shirt gewählt. Für Siebdruck links unter „Dunkle Shirts“ einen Weiß-Unterleger aktivieren, sonst wirken die Farben stumpf.</div>');
+
+  const svgText = editedSvg(f);
+  $('#vec').innerHTML = svgText.replace(/^<\?xml[^>]*>/, '');
+  const svg = $('#vec svg'); svg.removeAttribute('width'); svg.removeAttribute('height');
+  svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+
+  const vis = r.layers.filter(l => !(f.edits[l.pi] || {}).hidden);
+  const wcm = +f.settings.width_cm, hcm = wcm * r.height / r.width;
+  $('#stats').innerHTML = [
+    [vis.length, vis.length === 1 ? 'Film / Sieb' : 'Filme / Siebe'],
+    [vis.reduce((a, l) => a + l.paths, 0).toLocaleString('de'), 'Pfade'],
+    [vis.reduce((a, l) => a + l.nodes, 0).toLocaleString('de'), 'Ankerpunkte'],
+    [`${fmt(wcm)} × ${fmt(hcm)}`, 'cm Druckgröße'],
+  ].map(([b, s]) => `<div class="stat"><b>${b}</b><span>${s}</span></div>`).join('');
+
+  renderCheck(f);
+
+  const issueBy = Object.fromEntries(((r.check || {}).issues || []).map(i => [i.pi, i]));
+  const colorLayers = r.layers.filter(l => l.role === 'color');
+  $('#unmerge').classList.toggle('hidden', !f.merge || f.merge.every((t, i) => t === i));
+  const box = $('#layers'); box.innerHTML = '';
+  r.layers.forEach(l => {
+    const ub = l.role === 'underbase';
+    const e = f.edits[l.pi] || {}; const hex = (e.hex || l.hex).toUpperCase();
+    const d = document.createElement('div'); d.className = 'layer' + (e.hidden ? ' off' : '');
+    const iss = issueBy[l.pi];
+    const badges = (ub ? '<span class="badge ub">Unterleger</span>' : '') +
+      (l.is_bg && !ub ? '<span class="badge" title="Entspricht der Hintergrundfarbe, z. B. Innenräume von Buchstaben. Auf weißen Shirts ausblenden, auf dunklen ggf. weiß drucken.">Hintergrund</span>' : '') +
+      (iss && !e.hidden ? `<span class="badge warn" title="Siehe Druck-Check">⚠ ${iss.thin + iss.gaps}</span>` : '');
+    d.innerHTML = `
+      <div class="top">
+        <div class="sw" style="background:${hex}"><input type="color" value="${hex.toLowerCase()}" title="Farbe ändern"></div>
+        <div class="meta"><div class="hex"><span class="hv">${esc(e.pantone || hex)}</span>${badges}</div>
+          <div class="sub">${ub ? 'Druck zuerst · ' : ''}${l.share.toLocaleString('de')} % · ${l.paths} Pfade · ${l.nodes.toLocaleString('de')} Punkte</div></div>
+        <button class="ic mg" title="Mit anderer Farbe zusammenlegen" ${ub || colorLayers.length < 2 ? 'disabled' : ''}>${icMerge}</button>
+        <button class="ic eye" title="${e.hidden ? 'Einblenden' : 'Nicht drucken'}">${e.hidden ? eyeOff : eyeOn}</button>
+      </div>
+      <div class="pms"></div>`;
+    const pmsBox = d.querySelector('.pms');
+    if (ub || isWhite(hex)) pmsBox.remove();
+    else if (e.pantone) {
+      pmsBox.classList.add('ok');
+      pmsBox.innerHTML = `✓ auf Pantone gesetzt <button class="linkbtn">zurück</button>`;
+      pmsBox.querySelector('button').onclick = () => { const x = { ...f.edits[l.pi] }; delete x.pantone; delete x.hex; f.edits[l.pi] = x; commit(f); renderResult(); };
+    } else {
+      const p = nearestPantone(hex);
+      if (p) {
+        pmsBox.innerHTML = `<span class="pd" style="background:${p.hex}"></span>≈ ${esc(p.name)} · ΔE ${p.dE.toFixed(1).replace('.', ',')}
+          <button class="linkbtn">übernehmen</button>`;
+        pmsBox.querySelector('button').onclick = () => { f.edits[l.pi] = { ...e, hex: p.hex, pantone: p.name }; commit(f); renderResult(); };
+      } else pmsBox.remove();
+    }
+    const inp = d.querySelector('input');
+    inp.oninput = () => { f.edits[l.pi] = { ...f.edits[l.pi], hex: inp.value, pantone: undefined };
+      d.querySelector('.sw').style.background = inp.value; d.querySelector('.hv').textContent = inp.value.toUpperCase(); quickRecolor(); };
+    inp.onchange = () => { commit(f); renderResult(); renderBrushPal(); };
+    d.querySelector('.eye').onclick = () => {
+      const x = { ...f.edits[l.pi], hidden: !e.hidden, manual: true }; delete x.auto; f.edits[l.pi] = x;
+      // Unterleger oder Druck-Check-Markierungen hängen an den sichtbaren Ebenen -> neu rechnen
+      if ((r.layers.some(x => x.role === 'underbase') || issueBy[l.pi]) && !ub) refine(f); else { commit(f); renderResult(); }
+    };
+    d.querySelector('.mg').onclick = () => {
+      let mb = d.querySelector('.mergebox'); if (mb) { mb.remove(); return; }
+      const others = colorLayers.filter(o => o.pi !== l.pi);
+      d.insertAdjacentHTML('beforeend', `<div class="mergebox">aufnehmen in
+        <select><option value="">Farbe wählen …</option>${others.map(o => { const oh = layerHex(f, o.pi);
+          return `<option value="${o.pi}">${esc((f.edits[o.pi] || {}).pantone || oh)} (${o.share.toLocaleString('de')} %)</option>`; }).join('')}</select></div>`);
+      d.querySelector('.mergebox select').onchange = ev => {
+        if (ev.target.value === '') return;
+        const t = +ev.target.value;
+        f.merge = f.merge.map(x => (x === l.pi ? t : x)); f.merge[l.pi] = t;
+        const x = { ...f.edits }; delete x[l.pi]; f.edits = x;
+        refine(f);
+      };
+    };
+    box.append(d);
+  });
+  renderBrushPal();
+  applyView();
+}
+
+function renderCheck(f) {
+  const c0 = f.result.check || {}, box = $('#checkRes');
+  // Ebenen, die nicht gedruckt werden, zählen im Check nicht
+  const issues = (c0.issues || []).filter(i => !(f.edits[i.pi] || {}).hidden);
+  const c = { ...c0, issues, total: issues.reduce((a, i) => a + i.thin + i.gaps, 0) };
+  const mm = (c.min_mm ?? 0.5).toLocaleString('de');
+  $('#minMm').value = f.minMm ?? c.min_mm ?? '';
+  $('#fixThin').checked = !!f.fixThin;
+  if (!c.total) {
+    box.innerHTML = `<div class="pc ok"><b>✓ Alles druckbar</b>Keine Linien oder Lücken unter ${mm} mm${f.fixThin ? ' (nach dem Verdicken)' : ''}.</div>`;
+  } else {
+    const items = c.issues.map(i => {
+      const parts = [];
+      if (i.thin) parts.push(`${i.thin} zu dünne Stelle${i.thin > 1 ? 'n' : ''}`);
+      if (i.gaps) parts.push(`${i.gaps} zu enge Lücke${i.gaps > 1 ? 'n' : ''}`);
+      return `<li><i style="background:${layerHex(f, i.pi)}"></i>${esc((f.edits[i.pi] || {}).pantone || layerHex(f, i.pi))}: ${parts.join(', ')}</li>`;
+    }).join('');
+    box.innerHTML = `<div class="pc bad"><b>⚠ ${c.total} Problemstelle${c.total > 1 ? 'n' : ''} (unter ${mm} mm)</b>
+      Diese Details können beim Druck wegbrechen oder zulaufen.<ul>${items}</ul></div>`;
+  }
+  const img = $('#chk');
+  if (r_png(f)) img.src = r_png(f);
+  updateChkVisibility();
+}
+const r_png = f => f && f.result && f.result.check_png;
+function updateChkVisibility() {
+  const f = cur();
+  $('#chk').classList.toggle('hidden', !(r_png(f) && $('#showChk').checked && state.view !== 'mockup'));
+}
+$('#showChk').onchange = updateChkVisibility;
+$('#fixThin').onchange = e => { const f = cur(); if (!f) return; f.fixThin = e.target.checked; refine(f); };
+$('#minMm').onchange = e => {
+  const f = cur(); if (!f) return;
+  const v = parseFloat(String(e.target.value).replace(',', '.'));
+  f.minMm = isFinite(v) && v > 0 ? Math.min(5, Math.max(0.1, v)) : null; refine(f);
+};
+
+function quickRecolor() {
+  const f = cur(); if (!f) return;
+  document.querySelectorAll('#vec g[data-color], #mock g[data-color]').forEach(g => {
+    const e = f.edits[+g.getAttribute('data-pi')]; if (e && e.hex) g.setAttribute('fill', e.hex);
+  });
+}
+
+$('#allPms').onclick = () => {
+  const f = cur(); if (!f || !f.result) return;
+  let n = 0;
+  for (const l of f.result.layers) {
+    if (l.role !== 'color') continue;
+    const e = f.edits[l.pi] || {}; const hex = e.hex || l.hex;
+    if (e.pantone || isWhite(hex)) continue;
+    const p = nearestPantone(hex); if (p) { f.edits[l.pi] = { ...e, hex: p.hex, pantone: p.name }; n++; }
+  }
+  if (n) commit(f);
+  renderResult(); toast('Alle Farben auf den nächsten Pantone-Ton gesetzt');
+};
+$('#unmerge').onclick = () => { const f = cur(); if (!f) return; f.merge = f.palette.map((_, i) => i); refine(f); };
+
+const eyeOn = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>';
+const eyeOff = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3l18 18M10.6 10.6a2 2 0 0 0 2.8 2.8M9.9 5.2A9.8 9.8 0 0 1 12 5c6.5 0 10 7 10 7a17 17 0 0 1-3.2 4.2M6.6 6.6A17 17 0 0 0 2 12s3.5 7 10 7a9.6 9.6 0 0 0 5.4-1.6"/></svg>';
+const icMerge = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="8" cy="8" r="5"/><circle cx="16" cy="16" r="5"/></svg>';
+
+// ================================================================ Pinsel (manuell nachbessern)
+// Striche werden als Liste gespeichert (für Rückgängig) und in einen Code-Puffer in Arbeitsauflösung
+// gerastert: 0 = unbemalt, Palettenindex+1 = diese Farbe, 255 = Hintergrund (radieren).
+const ERASE = 255;
+$('#brushBtn').onclick = () => setTool(state.tool ? null : 'brush');
+
+function setTool(t) {
+  state.tool = t;
+  $('#brushBtn').classList.toggle('on', !!t);
+  $('#brushbar').classList.toggle('hidden', !t);
+  $('#vp').classList.toggle('painting', !!t);
+  $('#cursor').classList.toggle('hidden', !t);
+  if (t && (state.view === 'compare' || state.view === 'mockup')) setView('vector');
+  renderBrushPal(); renderPaint(); updateCursorSize();
+  setTimeout(fit, 0);
+}
+
+function renderBrushPal() {
+  const f = cur(), box = $('#brushPal');
+  if (!f || !f.result || !state.tool) { box.innerHTML = ''; return; }
+  const cols = f.result.layers.filter(l => l.role === 'color' && f.merge[l.pi] === l.pi);
+  if (state.brushCode == null || (state.brushCode !== ERASE && !cols.some(l => l.pi + 1 === state.brushCode)))
+    state.brushCode = cols.length ? cols[0].pi + 1 : ERASE;
+  box.innerHTML = cols.map(l => `<button class="chip${state.brushCode === l.pi + 1 ? ' on' : ''}" data-code="${l.pi + 1}"
+      style="background:${layerHex(f, l.pi)}" title="Malen mit ${esc((f.edits[l.pi] || {}).pantone || layerHex(f, l.pi))}"></button>`).join('') +
+    `<button class="chip erase${state.brushCode === ERASE ? ' on' : ''}" data-code="${ERASE}" title="Radierer: wird zu Hintergrund (Shirt)"></button>`;
+  box.querySelectorAll('[data-code]').forEach(b => b.onclick = () => { state.brushCode = +b.dataset.code; renderBrushPal(); });
+}
+
+function ensurePaint(f) {
+  const W = f.result.width, H = f.result.height;
+  if (f.paint && f.paint.W === W && f.paint.H === H) return f.paint;
+  const p = { W, H, buf: new Uint8Array(W * H) };
+  for (const s of f.strokes) rasterStroke(p, s);
+  f.paint = p; return p;
+}
+function rasterDab(p, cx, cy, r, code) {
+  const x0 = Math.max(0, Math.floor(cx - r)), x1 = Math.min(p.W - 1, Math.ceil(cx + r));
+  const y0 = Math.max(0, Math.floor(cy - r)), y1 = Math.min(p.H - 1, Math.ceil(cy + r)), r2 = r * r;
+  for (let y = y0; y <= y1; y++) { const dy = y - cy, row = y * p.W;
+    for (let x = x0; x <= x1; x++) { const dx = x - cx; if (dx * dx + dy * dy <= r2) p.buf[row + x] = code; } }
+  return [x0, y0, x1, y1];
+}
+function rasterSeg(p, a, b, r, code) {
+  const d = Math.hypot(b[0] - a[0], b[1] - a[1]), n = Math.max(1, Math.ceil(d / Math.max(1, r * 0.35)));
+  let box = null;
+  for (let i = 0; i <= n; i++) {
+    const t = i / n, bb = rasterDab(p, a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, r, code);
+    box = box ? [Math.min(box[0], bb[0]), Math.min(box[1], bb[1]), Math.max(box[2], bb[2]), Math.max(box[3], bb[3])] : bb;
+  }
+  return box;
+}
+function rasterStroke(p, s) { for (let i = 0; i < s.pts.length; i++) rasterSeg(p, s.pts[Math.max(0, i - 1)], s.pts[i], s.r, s.c); }
+
+function paintColors(f) {
+  const m = { [ERASE]: [255, 0, 170] };
+  for (const l of f.result.layers) if (l.role === 'color') m[l.pi + 1] = hexToRgb(layerHex(f, f.merge[l.pi]));
+  return m;
+}
+function renderPaint(box) {
+  const f = cur(), cv = $('#paint');
+  const show = !!(f && f.result && state.tool && state.view !== 'mockup');
+  cv.classList.toggle('hidden', !show);
+  if (!show) return;
+  const p = ensurePaint(f);
+  if (cv.width !== p.W || cv.height !== p.H) { cv.width = p.W; cv.height = p.H; box = null; }
+  const ctx = cv.getContext('2d');
+  const [x0, y0, x1, y1] = box || [0, 0, p.W - 1, p.H - 1];
+  const w = x1 - x0 + 1, h = y1 - y0 + 1; if (w <= 0 || h <= 0) return;
+  const img = ctx.createImageData(w, h), cols = paintColors(f), a = 150;
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    const c = p.buf[(y0 + y) * p.W + x0 + x]; if (!c) continue;
+    const col = cols[c] || [255, 0, 170], o = (y * w + x) * 4;
+    img.data[o] = col[0]; img.data[o + 1] = col[1]; img.data[o + 2] = col[2]; img.data[o + 3] = a;
+  }
+  ctx.putImageData(img, x0, y0);
+}
+async function paintBlob(f) {
+  const p = ensurePaint(f), cv = document.createElement('canvas');
+  cv.width = p.W; cv.height = p.H;
+  const ctx = cv.getContext('2d'), img = ctx.createImageData(p.W, p.H);
+  for (let i = 0; i < p.buf.length; i++) { const c = p.buf[i]; if (c) { img.data[i * 4] = c; img.data[i * 4 + 3] = 255; } }
+  ctx.putImageData(img, 0, 0);
+  return new Promise(res => cv.toBlob(res, 'image/png'));
+}
+function toImage(e) {
+  const f = cur(), r = $('#stage').getBoundingClientRect();
+  return [(e.clientX - r.left) / r.width * f.result.width, (e.clientY - r.top) / r.height * f.result.height];
+}
+function brushRadiusImg() {
+  const f = cur(), r = $('#stage').getBoundingClientRect();
+  return Math.max(0.6, (+$('#brushSize').value / 2) / r.width * f.result.width);
+}
+function updateCursorSize() { const s = +$('#brushSize').value; Object.assign($('#cursor').style, { width: s + 'px', height: s + 'px' }); }
+$('#brushSize').oninput = updateCursorSize;
+$('#brushClear').onclick = () => {
+  const f = cur(); if (!f || !f.strokes.length) return;
+  f.strokes = []; f.paint = null; renderPaint(); refine(f);
+};
+let applyT;
+function startStroke(e) {
+  const f = cur(); if (!f || !f.result || f.status === 'busy') return false;
+  clearTimeout(applyT);
+  const p = ensurePaint(f), stroke = { c: state.brushCode, r: brushRadiusImg(), pts: [toImage(e)] };
+  renderPaint(rasterSeg(p, stroke.pts[0], stroke.pts[0], stroke.r, stroke.c));
+  vp.setPointerCapture(e.pointerId);
+  vp.onpointermove = ev => {
+    moveCursor(ev);
+    const pt = toImage(ev), last = stroke.pts.at(-1);
+    if (Math.hypot(pt[0] - last[0], pt[1] - last[1]) < stroke.r * 0.2) return;
+    stroke.pts.push(pt); renderPaint(rasterSeg(p, last, pt, stroke.r, stroke.c));
+  };
+  vp.onpointerup = () => {
+    vp.onpointermove = moveCursor; vp.onpointerup = null;
+    f.strokes = [...f.strokes, stroke];
+    applyT = setTimeout(() => refine(f), 450);  // kurze Pause erlaubt mehrere Striche am Stück
+  };
+  return true;
+}
+function moveCursor(e) {
+  if (!state.tool) return;
+  const r = vp.getBoundingClientRect();
+  Object.assign($('#cursor').style, { left: (e.clientX - r.left) + 'px', top: (e.clientY - r.top) + 'px' });
+}
+
+// ================================================================ Shirtfarbe & Aussparen
+function setShirt(c, el) {
+  state.shirt = c;
+  $('#stage').style.background = c;
+  document.querySelectorAll('.chip[data-c], .shirts label.chip').forEach(x => x.classList.toggle('on', x === el));
+  if (state.view === 'mockup') renderMockup();
+  for (const g of state.files) if (g.result && g.status !== 'busy' && autoKnockout(g)) refine(g);
+  const f = cur(); if (f && f.result) renderResult();
+}
+
+// Ebenen in Shirtfarbe automatisch ausblenden (dort scheint der Stoff durch).
+// Automatisch ausgeblendete Ebenen kommen wieder, wenn die Shirtfarbe nicht mehr passt.
+// Manuelles Ein-/Ausblenden (ohne auto-Markierung) wird nie überschrieben.
+function autoKnockout(f) {
+  const sub = substrate(f), color = f.result.layers.filter(l => l.role === 'color');
+  if (!sub) {  // transparente Folie: nichts aussparen, automatisch ausgeblendete Ebenen zurückholen
+    let ch = false;
+    for (const l of color) { const e = f.edits[l.pi] || {}; if (e.hidden && e.auto) { const x = { ...e, hidden: false }; delete x.auto; f.edits[l.pi] = x; ch = true; } }
+    return ch;
+  }
+  const s = lab(sub);
+  const match = l => dE00(lab((f.edits[l.pi] || {}).hex || l.hex), s) < 12;
+  const hits = color.filter(match);
+  if (hits.length && hits.length === color.length) return false; // nie alles aussparen
+  let changed = false;
+  for (const l of color) {
+    const e = f.edits[l.pi] || {};
+    if (match(l) && !e.hidden && !e.manual) { f.edits[l.pi] = { ...e, hidden: true, auto: true }; changed = true; }
+    else if (!match(l) && e.hidden && e.auto) { const x = { ...e, hidden: false }; delete x.auto; f.edits[l.pi] = x; changed = true; }
+  }
+  return changed;
+}
+document.querySelectorAll('.chip[data-c]').forEach(b => b.onclick = () => setShirt(b.dataset.c, b));
+$('#shirtCustom').oninput = e => setShirt(e.target.value, e.target.parentElement);
+
+$('#knockout').onclick = () => {
+  const f = cur(); if (!f || !f.result) return;
+  const s = lab(state.shirt); let n = 0;
+  for (const l of f.result.layers) {
+    if (l.role !== 'color') continue;
+    const e = f.edits[l.pi] || {};
+    if (!e.hidden && dE00(lab(e.hex || l.hex), s) < 12) { f.edits[l.pi] = { ...e, hidden: true }; n++; }
+  }
+  if (!n) return toast('Keine Ebene hat die Farbe des Shirts');
+  toast(`${n} Ebene${n > 1 ? 'n' : ''} ausgespart – dort scheint das Shirt durch`);
+  if (f.result.layers.some(l => l.role === 'underbase')) refine(f); else { commit(f); renderResult(); }
+};
+
+let toastT;
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2600); }
+
+// ================================================================ Ansichten
+function setView(v) {
+  state.view = v;
+  document.querySelectorAll('#view button').forEach(x => x.classList.toggle('on', x.dataset.v === v));
+  if (v === 'mockup' && state.tool) setTool(null);
+  applyView(); fit();
+}
+document.querySelectorAll('#view button').forEach(b => b.onclick = () => setView(b.dataset.v));
+
+function applyView() {
+  const v = state.view, cmp = v === 'compare', mock = v === 'mockup';
+  const st = $('#stage');
+  st.classList.toggle('outline', v === 'outline');
+  st.classList.toggle('mock', mock);
+  st.style.background = mock ? 'transparent' : state.shirt;
+  ['#wipe', '#tagL', '#tagR'].forEach(id => $(id).classList.toggle('hidden', !cmp));
+  $('#orig').style.visibility = cmp ? 'visible' : 'hidden';
+  $('#vec').classList.toggle('hidden', mock);
+  $('#mock').classList.toggle('hidden', !mock);
+  $('#mockctl').classList.toggle('hidden', !mock);
+  $('#mocknote').classList.toggle('hidden', !mock);
+  const p = state.wipe * 100;
+  $('#vec').style.clipPath = cmp ? `inset(0 0 0 ${p}%)` : 'none';
+  $('#chk').style.clipPath = cmp ? `inset(0 0 0 ${p}%)` : 'none';
+  $('#orig').style.clipPath = `inset(0 ${100 - p}% 0 0)`;
+  $('#wipe').style.left = p + '%';
+  updateChkVisibility(); renderPaint();
+  if (mock) renderMockup();
+}
+
+$('#wipe i').addEventListener('pointerdown', e => {
+  e.stopPropagation(); const el = e.target; el.setPointerCapture(e.pointerId);
+  el.onpointermove = ev => {
+    const r = $('#stage').getBoundingClientRect();
+    state.wipe = Math.min(1, Math.max(0, (ev.clientX - r.left) / r.width)); applyView();
+  };
+  el.onpointerup = () => { el.onpointermove = null; };
+});
+
+// ================================================================ T-Shirt-Mockup (Maße in cm)
+const SIZES = { S: [48, 70], M: [51, 72], L: [54, 74], XL: [57, 76], XXL: [60, 78], '3XL': [63, 80] };
+const mockGeom = () => {
+  const [W, L] = SIZES[$('#mSize').value] || SIZES.L;
+  const reach = W * 0.40, half = W / 2;
+  return { W, L, half, reach, minX: -half - reach - 2, maxX: half + reach + 2, minY: -3, maxY: L + 4 };
+};
+['#mSide', '#mSize', '#mOff'].forEach(id => $(id).addEventListener('input', () => {
+  if (id === '#mSide') $('#mOff').value = $('#mSide').value === 'front' ? 7 : 10;
+  renderMockup(); if (id === '#mSize') fit(); markDirty();
+}));
+
+function shirtPath(g, back) {
+  const { W, L, half } = g, n = W * 0.18, drop = back ? 2.2 : 8.5;
+  const side = s => [
+    [s * n, 0], [s * (half + 3), 3.2], [s * (half + W * 0.40), 17], [s * (half + W * 0.30), 24.5],
+    [s * (half + 0.4), 20.5], [s * (half + 1.2), L],
+  ];
+  const R = side(1), Lf = side(-1);
+  return {
+    body: `M${Lf[0]} L${Lf[1]} L${Lf[2]} L${Lf[3]} L${Lf[4]} C${-half - 0.2} 34 ${-half + 0.5} 52 ${Lf[5]} ` +
+          `Q0 ${L + 1.4} ${R[5]} C${half - 0.5} 52 ${half + 0.2} 34 ${R[4]} L${R[3]} L${R[2]} L${R[1]} L${R[0]} ` +
+          `Q0 ${drop * 2} ${Lf[0]} Z`,
+    neck: `M${-n} 0 Q0 ${drop * 2} ${n} 0`, drop, n,
+    sleeves: [[Lf[2], Lf[3], Lf[4]], [R[2], R[3], R[4]]],
+  };
+}
+
+function renderMockup() {
+  const f = cur(); const box = $('#mock');
+  if (!f || !f.result) { box.innerHTML = ''; return; }
+  if (prod(f)) return renderProductMock(f);
+  const g = mockGeom(), back = $('#mSide').value === 'back', sp = shirtPath(g, back);
+  const r = f.result, wcm = +f.settings.width_cm, hcm = wcm * r.height / r.width;
+  const top = sp.drop + (+$('#mOff').value || 0);
+  const x0 = -wcm / 2;
+  const doc = new DOMParser().parseFromString(editedSvg(f), 'image/svg+xml');
+  const inner = [...doc.documentElement.children].map(n => new XMLSerializer().serializeToString(n)).join('');
+  const dark = lab(state.shirt)[0] < 45;
+  const vb = `${g.minX} ${g.minY} ${g.maxX - g.minX} ${g.maxY - g.minY}`;
+  const [a, b] = sp.sleeves;
+  box.innerHTML = `
+  <svg viewBox="${vb}" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <clipPath id="shirtClip"><path d="${sp.body}"/></clipPath>
+      <linearGradient id="sideShade" x1="0" x2="1">
+        <stop offset="0" stop-color="#000" stop-opacity=".28"/><stop offset=".16" stop-color="#000" stop-opacity=".05"/>
+        <stop offset=".5" stop-color="#fff" stop-opacity="${dark ? .06 : .10}"/>
+        <stop offset=".84" stop-color="#000" stop-opacity=".05"/><stop offset="1" stop-color="#000" stop-opacity=".28"/>
+      </linearGradient>
+      <linearGradient id="vShade" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#000" stop-opacity=".12"/><stop offset=".25" stop-color="#000" stop-opacity="0"/>
+        <stop offset=".9" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".14"/>
+      </linearGradient>
+      <filter id="soft" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="1.1"/></filter>
+      <filter id="fabric" x="0" y="0" width="100%" height="100%">
+        <feTurbulence type="fractalNoise" baseFrequency="1.6" numOctaves="2" seed="3"/>
+        <feColorMatrix values="0 0 0 0 .5  0 0 0 0 .5  0 0 0 0 .5  0 0 0 .55 0"/>
+      </filter>
+      <filter id="drop" x="-10%" y="-10%" width="120%" height="130%"><feDropShadow dx="0" dy="1.2" stdDeviation="1.4" flood-opacity=".25"/></filter>
+    </defs>
+    <g filter="url(#drop)"><path d="${sp.body}" fill="${state.shirt}"/></g>
+    <g clip-path="url(#shirtClip)">
+      <svg x="${x0}" y="${top}" width="${wcm}" height="${hcm}" viewBox="0 0 ${r.width} ${r.height}" preserveAspectRatio="none" style="opacity:.96">${inner}</svg>
+      <rect x="${g.minX}" y="${g.minY}" width="${g.maxX - g.minX}" height="${g.maxY - g.minY}" fill="url(#vShade)"/>
+      <rect x="${-g.half - 1.5}" y="${g.minY}" width="${g.W + 3}" height="${g.maxY - g.minY}" fill="url(#sideShade)"/>
+      <path d="M${a[0]} L${a[1]} L${a[2]} Z M${b[0]} L${b[1]} L${b[2]} Z" fill="#000" opacity=".10"/>
+      <g filter="url(#soft)" fill="none" stroke-linecap="round">
+        <path d="M${-g.half + 2} ${g.L * .33} q6 ${g.L * .12} 3 ${g.L * .35}" stroke="#000" stroke-width="1.6" opacity=".10"/>
+        <path d="M${g.half - 3} ${g.L * .40} q-5 ${g.L * .14} -1 ${g.L * .32}" stroke="#000" stroke-width="1.4" opacity=".09"/>
+        <path d="M${-g.W * .18} ${g.L * .78} q${g.W * .2} -3 ${g.W * .38} 1" stroke="#fff" stroke-width="1.8" opacity="${dark ? .05 : .16}"/>
+        <path d="M${-g.half - .5} 22 q4 4 3 10" stroke="#000" stroke-width="1.8" opacity=".15"/>
+        <path d="M${g.half + .5} 22 q-4 4 -3 10" stroke="#000" stroke-width="1.8" opacity=".15"/>
+      </g>
+      <rect x="${g.minX}" y="${g.minY}" width="${g.maxX - g.minX}" height="${g.maxY - g.minY}" filter="url(#fabric)" opacity=".10" style="mix-blend-mode:overlay"/>
+    </g>
+    <path d="${sp.neck}" fill="none" stroke="${state.shirt}" stroke-width="2.2"/>
+    <path d="${sp.neck}" fill="none" stroke="#000" stroke-opacity=".22" stroke-width="2.2"/>
+    <path d="M${-sp.n + .3} .2 Q0 ${sp.drop * 2 - 2.3} ${sp.n - .3} .2" fill="none" stroke="#000" stroke-opacity=".18" stroke-width=".25" stroke-dasharray=".6 .5"/>
+    ${back ? `<path d="M-4 1.5 h8 v3 h-8 z" fill="#fff" opacity=".85"/><text x="0" y="3.6" font-size="1.6" text-anchor="middle" fill="#555" font-family="sans-serif">${$('#mSize').value}</text>` : ''}
+  </svg>`;
+  const maxW = g.W - 8, note = $('#mocknote');
+  const tooWide = wcm > maxW, tooLong = top + hcm > g.L - 4;
+  note.classList.toggle('bad', tooWide || tooLong);
+  note.textContent = tooWide ? `⚠ Motiv (${fmt(wcm)} cm) ist breiter als der übliche Druckbereich bei Größe ${$('#mSize').value} (max. ca. ${fmt(maxW)} cm).`
+    : tooLong ? '⚠ Motiv reicht zu weit nach unten. Abstand oder Druckbreite verringern.'
+    : `${back ? 'Rücken' : 'Brust'} · Motiv ${fmt(wcm)} × ${fmt(hcm)} cm · Größe ${$('#mSize').value} (Brustbreite ${g.W} cm)`;
+}
+
+// ================================================================ Zoom, Verschieben, Malen
+const vp = $('#vp');
+vp.addEventListener('contextmenu', e => { if (state.tool) e.preventDefault(); });
+function applyTransform() {
+  const st = $('#stage'); st.style.transform = `translate(${state.pan.x}px,${state.pan.y}px) scale(${state.zoom})`;
+  st.style.setProperty('--iz', 1 / state.zoom); // Griff und Beschriftungen bleiben beim Zoomen gleich groß
+}
+function fit() {
+  let ar;
+  if (state.view === 'mockup' && prod(cur()) && cur().result) { const b = productBox(cur()); ar = b[2] / b[3]; }
+  else if (state.view === 'mockup') { const g = mockGeom(); ar = (g.maxX - g.minX) / (g.maxY - g.minY); }
+  else { const img = $('#orig'); if (!img.naturalWidth) return; ar = img.naturalWidth / img.naturalHeight; }
+  const W = vp.clientWidth - 60, H = vp.clientHeight - 60;
+  let w = W, h = W / ar; if (h > H) { h = H; w = H * ar; }
+  const st = $('#stage'); st.style.width = w + 'px'; st.style.height = h + 'px';
+  state.zoom = 1; state.pan = { x: (vp.clientWidth - w) / 2, y: (vp.clientHeight - h) / 2 }; applyTransform();
+}
+function zoomAt(f, cx, cy) {
+  const nz = Math.min(40, Math.max(0.2, state.zoom * f)); const k = nz / state.zoom;
+  state.pan.x = cx - (cx - state.pan.x) * k; state.pan.y = cy - (cy - state.pan.y) * k; state.zoom = nz; applyTransform();
+}
+vp.addEventListener('wheel', e => {
+  e.preventDefault(); const r = vp.getBoundingClientRect();
+  zoomAt(Math.exp(-e.deltaY * 0.0015), e.clientX - r.left, e.clientY - r.top);
+}, { passive: false });
+vp.addEventListener('pointermove', e => { if (!vp.onpointermove) moveCursor(e); });
+vp.addEventListener('pointerleave', () => state.tool && $('#cursor').classList.add('hidden'));
+vp.addEventListener('pointerenter', () => state.tool && $('#cursor').classList.remove('hidden'));
+vp.addEventListener('pointerdown', e => {
+  if (e.target.closest('.zoomctl') || e.target.closest('.wipe')) return;
+  if (state.tool && e.button === 0 && !state.space) { if (startStroke(e)) return; }
+  if (e.button !== 0 && !(state.tool && e.button === 2) && e.button !== 1) return;
+  vp.setPointerCapture(e.pointerId); vp.classList.add('drag');
+  const sx = e.clientX - state.pan.x, sy = e.clientY - state.pan.y;
+  vp.onpointermove = ev => { moveCursor(ev); state.pan = { x: ev.clientX - sx, y: ev.clientY - sy }; applyTransform(); };
+  vp.onpointerup = () => { vp.onpointermove = null; vp.onpointerup = null; vp.classList.remove('drag'); };
+});
+$('#zIn').onclick = () => zoomAt(1.4, vp.clientWidth / 2, vp.clientHeight / 2);
+$('#zOut').onclick = () => zoomAt(1 / 1.4, vp.clientWidth / 2, vp.clientHeight / 2);
+$('#zFit').onclick = fit;
+window.addEventListener('resize', fit);
+
+// ================================================================ Navigation (Seitenleisten-Tabs, Bottom-Navigation)
+const MQ = matchMedia('(max-width:900px)');
+const isMobile = () => MQ.matches;
+const SIDE = { motive: 'left', settings: 'left', layers: 'right', export: 'right' };
+const nav = { left: 'motive', right: 'layers', tab: 'motive', prev: [] };
+function setTab(t, back) {
+  if (!back && t !== nav.tab) nav.prev.push(nav.tab);
+  if (nav.prev.length > 20) nav.prev.shift();
+  if (SIDE[t]) nav[SIDE[t]] = t;
+  const wasHidden = nav.tab !== 'preview';
+  nav.tab = t; document.querySelector('main').dataset.tab = t;
+  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('on', p.dataset.panel === nav.left || p.dataset.panel === nav.right));
+  document.querySelectorAll('.ptabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === nav.left || b.dataset.tab === nav.right));
+  document.querySelectorAll('.bnav button').forEach(b => b.classList.toggle('on', b.dataset.tab === t));
+  if (isMobile() && t === 'preview' && wasHidden && cur()) requestAnimationFrame(fit);
+  if (isMobile() && SIDE[t]) document.querySelector(`aside.${SIDE[t]}`).scrollTop = 0;
+  if (t === 'layers' && cur() && cur().result && typeof markStep === 'function') markStep('check');
+}
+document.querySelectorAll('.ptabs button, .bnav button').forEach(b => b.onclick = () => setTab(b.dataset.tab));
+document.querySelectorAll('[data-goto]').forEach(b => b.onclick = () => setTab(b.dataset.goto));
+$('#emptyPick').onclick = () => $('#pick').click();
+MQ.addEventListener('change', () => { if (!isMobile() && nav.tab === 'preview') nav.tab = nav.left; setTab(isMobile() ? (cur() ? 'preview' : 'motive') : nav.tab, true); requestAnimationFrame(fit); });
+// Projekt-Menü (Handy): Speichern / Öffnen / Neu hinter "⋮"
+const pmenu = $('#pmenu');
+const syncMenu = () => { pmenu.style.display = isMobile() ? '' : 'contents'; if (!isMobile()) pmenu.classList.remove('open'); };
+syncMenu(); MQ.addEventListener('change', syncMenu);
+$('#moreBtn').onclick = e => { e.stopPropagation(); pmenu.classList.toggle('open'); };
+document.addEventListener('click', e => { if (!e.target.closest('#pmenu')) pmenu.classList.remove('open'); });
+pmenu.addEventListener('click', e => { if (e.target.closest('button')) pmenu.classList.remove('open'); });
+// Zurück-Taste (Android-App): erst zur vorherigen Ansicht, dann App verlassen
+window.vwBack = () => {
+  const dlg = document.querySelector('dialog[open]'); if (dlg) { dlg.close(); return true; }
+  if (pmenu.classList.contains('open')) { pmenu.classList.remove('open'); return true; }
+  if (!isMobile()) return false;
+  const p = nav.prev.pop();
+  if (p && p !== nav.tab) { setTab(p, true); return true; }
+  if (nav.tab !== 'preview' && cur()) { setTab('preview', true); return true; }
+  return false;
+};
+setTab('motive', true);
+
+// ================================================================ Hilfe, Einführung, Erste Schritte
+const store = { get(k) { try { return localStorage.getItem('vw.' + k); } catch (e) { return null; } },
+                set(k, v) { try { localStorage.setItem('vw.' + k, v); } catch (e) { /* privat */ } } };
+const ART = {
+  welcome: `<svg viewBox="0 0 220 120"><g fill="none" stroke="currentColor" stroke-width="2" opacity=".55"><rect x="14" y="22" width="76" height="76" rx="8"/></g>
+    <g fill="var(--ink)" opacity=".75"><rect x="34" y="70" width="10" height="10"/><rect x="44" y="60" width="10" height="10"/><rect x="54" y="50" width="10" height="10"/><rect x="44" y="70" width="30" height="10"/><rect x="64" y="60" width="10" height="10"/></g>
+    <path d="M100 60h22m-7-7 7 7-7 7" stroke="var(--accent)" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <rect x="132" y="22" width="76" height="76" rx="8" fill="var(--panel)" stroke="var(--accent)" stroke-width="2"/>
+    <path d="M148 84 170 38l22 46z" fill="var(--accent)"/><path d="M160 84l10-22 10 22z" fill="var(--ink)" opacity=".85"/></svg>`,
+  load: `<svg viewBox="0 0 220 120"><rect x="60" y="14" width="100" height="80" rx="10" fill="var(--panel)" stroke="currentColor" stroke-width="2" stroke-dasharray="6 5" opacity=".7"/>
+    <path d="M110 70V36m-13 13 13-13 13 13" stroke="var(--accent)" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="86" y="100" width="48" height="8" rx="4" fill="var(--accent)" opacity=".35"/></svg>`,
+  shirt: `<svg viewBox="0 0 220 120"><path d="M78 16l20-8h24l20 8 24 18-12 18-14-8v62H80V44l-14 8-12-18z" fill="#1b1b1d" stroke="currentColor" stroke-width="1.5" opacity=".95"/>
+    <path d="M98 8a12 9 0 0 0 24 0" fill="none" stroke="#555" stroke-width="2"/><path d="M96 82l14-30 14 30z" fill="#fff"/>
+    <g stroke="var(--line)" stroke-width="1.5"><circle cx="186" cy="34" r="9" fill="#fff"/><circle cx="186" cy="58" r="9" fill="#1b1b1d" stroke="var(--accent)" stroke-width="3"/><circle cx="186" cy="82" r="9" fill="#1f2a44"/><circle cx="34" cy="46" r="9" fill="#7a1f2b"/><circle cx="34" cy="72" r="9" fill="#3d5a3a"/></g></svg>`,
+  check: `<svg viewBox="0 0 220 120"><g transform="translate(40 18)"><path d="M70 0 140 30 70 60 0 30z" fill="var(--panel)" stroke="currentColor" stroke-width="2" opacity=".6"/>
+    <path d="M70 16 140 46 70 76 0 46z" fill="var(--panel)" stroke="var(--accent)" stroke-width="2"/></g>
+    <circle cx="84" cy="64" r="5" fill="#ff2828"/><circle cx="132" cy="70" r="5" fill="#1478ff"/>
+    <circle cx="176" cy="26" r="15" fill="var(--ok)"/><path d="m169 26 5 5 9-10" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  export: `<svg viewBox="0 0 220 120"><path d="M74 10h52l20 20v80H74z" fill="var(--panel)" stroke="currentColor" stroke-width="2" opacity=".75"/><path d="M126 10v20h20" fill="none" stroke="currentColor" stroke-width="2" opacity=".75"/>
+    <rect x="84" y="72" width="40" height="18" rx="4" fill="var(--accent)"/><text x="104" y="85" text-anchor="middle" font-size="11" font-weight="700" fill="#fff" font-family="sans-serif">PDF</text>
+    <path d="M110 34v26m-9-9 9 9 9-9" stroke="var(--ink)" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity=".7"/>
+    <path d="M160 70l16 14 16-14" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"/><path d="M176 40v42" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"/></svg>`,
+};
+const android = () => document.documentElement.classList.contains('android');
+const TOUR = [
+  { art: 'welcome', title: 'Willkommen bei Vektorwerk',
+    text: () => `<p>Du hast ein Logo oder Motiv als Bild (JPG, PNG) und willst es auf ein T-Shirt drucken lassen?</p>
+      <p>Druckereien brauchen dafür eine <b>Vektordatei</b>: scharf in jeder Größe, jede Farbe sauber getrennt. Genau die erstellt Vektorwerk – automatisch und ohne Vorkenntnisse.</p>
+      <div class="tip">In einer Minute zeigen wir dir den Ablauf. Du kannst jederzeit über <b>?</b> oben wieder hierher.</div>` },
+  { art: 'load', title: '1. Bild laden',
+    text: () => `<p>${isMobile() ? 'Tippe unten auf <b>Motive</b> und dann auf <b>„Bilder auswählen“</b>.' : 'Zieh ein Bild links in <b>Motive</b> hinein oder klicke auf das Feld. Strg+V funktioniert auch.'}
+      ${android() ? ' Du kannst Bilder auch aus der Galerie über <b>„Teilen“ → Vektorwerk</b> schicken.' : ''}</p>
+      <p>Die App rechnet sofort los. Du musst nichts einstellen.</p>
+      <div class="tip"><b>Tipp:</b> Je größer und schärfer das Bild, desto besser das Ergebnis. Gerade fotografieren, ohne Schatten.</div>` },
+  { art: 'shirt', title: '2. Shirtfarbe und Druckverfahren',
+    text: () => `<p>Wähle in der ${isMobile() ? '<b>Vorschau</b>' : 'Leiste über dem Bild'} die <b>Shirtfarbe</b>. Teile des Motivs, die so aussehen wie der Stoff, werden automatisch weggelassen – das spart Druckfarbe.</p>
+      <p>Unter <b>${isMobile() ? 'Einstellen' : 'Einstellungen'}</b> wählst du das Druckverfahren. Im Zweifel: <b>Siebdruck</b>.</p>` },
+  { art: 'check', title: '3. Ergebnis prüfen',
+    text: () => `<p>Unter <b>${isMobile() ? 'Ebenen' : 'Ebenen &amp; Prüfen'}</b> siehst du jede Druckfarbe einzeln.</p>
+      <p>Der <b>Druck-Check</b> markiert Stellen, die zu fein sind: <b style="color:#ff2828">rot</b> = zu dünn, <b style="color:#1478ff">blau</b> = Lücke zu eng.
+      Ein Haken bei „Dünne Stellen automatisch verdicken“ löst das meistens.</p>` },
+  { art: 'export', title: '4. Für die Druckerei speichern',
+    text: () => `<p>Unter <b>Export</b> speicherst du das <b>PDF</b> – in echter Druckgröße. Das ist die Datei für die Druckerei.</p>
+      <p>Für Siebdruck zusätzlich die <b>Siebdruck-Filme</b>. ${android() ? 'Alles landet im Ordner <b>Download/Vektorwerk</b>.' : 'Die Dateien landen in deinem Download-Ordner.'}</p>
+      <div class="tip">Begriff unklar? Bei jedem <b>?</b> neben einer Überschrift steht eine kurze Erklärung.</div>` },
+];
+let tourI = 0;
+function showTour(i) {
+  tourI = Math.max(0, Math.min(TOUR.length - 1, i)); const t = TOUR[tourI], last = tourI === TOUR.length - 1;
+  $('#tourArt').innerHTML = ART[t.art]; $('#tourTitle').textContent = t.title; $('#tourText').innerHTML = t.text();
+  $('#tourStep').textContent = tourI === 0 ? 'Einführung' : `Schritt ${tourI} von ${TOUR.length - 1}`;
+  $('#tourDots').innerHTML = TOUR.map((_, k) => `<i class="${k === tourI ? 'on' : ''}"></i>`).join('');
+  $('#tourBack').textContent = tourI === 0 ? 'Überspringen' : 'Zurück';
+  $('#tourNext').textContent = last ? (state.files.length ? 'Fertig' : 'Erstes Bild auswählen') : 'Weiter';
+  if (!$('#tourDlg').open) $('#tourDlg').showModal();
+}
+function endTour(pick) {
+  $('#tourDlg').close(); store.set('onboarded', '1');
+  if (pick && !state.files.length) { if (isMobile()) setTab('motive'); $('#pick').click(); }
+}
+$('#tourNext').onclick = () => tourI === TOUR.length - 1 ? endTour(true) : showTour(tourI + 1);
+$('#tourBack').onclick = () => tourI === 0 ? endTour(false) : showTour(tourI - 1);
+$('#tourDlg').addEventListener('cancel', () => store.set('onboarded', '1'));
+$('#emptyTour').onclick = () => showTour(0);
+
+function openHelp(key) {
+  const d = $('#helpDlg'); if (!d.open) d.showModal();
+  const el = key && document.getElementById('h-' + key);
+  if (el) { el.scrollIntoView({ block: 'start' }); el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); }
+  else d.querySelector('.help-body').scrollTop = 0;
+}
+$('#helpBtn').onclick = () => openHelp();
+$('#helpClose').onclick = () => $('#helpDlg').close();
+$('#helpTour').onclick = () => { $('#helpDlg').close(); showTour(0); };
+document.querySelectorAll('[data-jump]').forEach(b => b.onclick = () => { const el = document.getElementById(b.dataset.jump); el.scrollIntoView({ block: 'start', behavior: 'smooth' }); });
+document.querySelectorAll('.hq').forEach(b => b.onclick = e => { e.preventDefault(); e.stopPropagation(); openHelp(b.dataset.help === 'start' ? null : b.dataset.help); });
+document.querySelectorAll('dialog').forEach(d => d.addEventListener('click', e => { if (e.target === d) d.close(); })); // Klick neben den Dialog schließt ihn
+
+// Erste Schritte: hakt sich beim Benutzen selbst ab
+const STEPS = ['load', 'shirt', 'check', 'export'];
+const stepDone = k => store.get('step.' + k) === '1' || (k === 'load' && state.files.length > 0);
+function markStep(k) { if (store.get('step.' + k) !== '1') { store.set('step.' + k, '1'); renderSteps(); } }
+function renderSteps() {
+  const hide = store.get('stepsHidden') === '1';
+  $('#steps').classList.toggle('hidden', hide);
+  let next = true;
+  for (const li of document.querySelectorAll('#steps li')) {
+    const d = stepDone(li.dataset.step); li.classList.toggle('done', d); li.classList.toggle('next', !d && next);
+    li.querySelector('i').textContent = d ? '✓' : STEPS.indexOf(li.dataset.step) + 1; if (!d) next = false;
+  }
+  $('#stepsFin').classList.toggle('hidden', !STEPS.every(stepDone));
+}
+const STEP_GO = {
+  load: () => { if (isMobile()) setTab('motive'); $('#pick').click(); },
+  shirt: () => { if (isMobile()) setTab('preview'); const s = $('#shirts'); s.classList.add('flashbox'); setTimeout(() => s.classList.remove('flashbox'), 1600); toast('Wähle oben die Farbe deines Shirts'); },
+  check: () => setTab('layers'),
+  export: () => setTab('export'),
+};
+document.querySelectorAll('#steps li').forEach(li => li.onclick = () => STEP_GO[li.dataset.step]());
+$('#stepsHide').onclick = () => { store.set('stepsHidden', '1'); renderSteps(); toast('Über ? → Hilfe wieder einblendbar'); };
+$('#stepsShow').onclick = () => { store.set('stepsHidden', '0'); renderSteps(); $('#helpDlg').close(); setTab('motive'); };
+document.querySelectorAll('.chip[data-c], #shirtCustom').forEach(b => b.addEventListener('click', () => markStep('shirt')));
+document.querySelectorAll('#dlBox [data-f], #zipBtn').forEach(b => b.addEventListener('click', () => markStep('export')));
+
+
+// Zwei-Finger-Zoom und -Verschieben (Touch, z. B. in der Android-App)
+const touches = new Map(); let pinch = null;
+const mid = (a, b) => [(a.clientX + b.clientX) / 2, (a.clientY + b.clientY) / 2];
+vp.addEventListener('pointerdown', e => {
+  if (e.pointerType !== 'touch') return;
+  touches.set(e.pointerId, e);
+  if (touches.size !== 2) return;
+  e.stopImmediatePropagation();
+  if (vp.onpointerup) vp.onpointerup();  // laufenden Strich bzw. Verschieben sauber beenden
+  vp.onpointermove = null; vp.onpointerup = null; vp.classList.remove('drag');
+  const [a, b] = [...touches.values()], r = vp.getBoundingClientRect(), [cx, cy] = mid(a, b);
+  pinch = { d: Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY) || 1, cx: cx - r.left, cy: cy - r.top,
+            z: state.zoom, pan: { ...state.pan } };
+}, true);
+vp.addEventListener('pointermove', e => {
+  if (!touches.has(e.pointerId)) return;
+  touches.set(e.pointerId, e);
+  if (!pinch || touches.size < 2) return;
+  const [a, b] = [...touches.values()], r = vp.getBoundingClientRect(), [mx, my] = mid(a, b);
+  const nz = Math.min(40, Math.max(0.2, pinch.z * Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY) / pinch.d));
+  const k = nz / pinch.z;
+  state.zoom = nz;
+  state.pan = { x: mx - r.left - (pinch.cx - pinch.pan.x) * k, y: my - r.top - (pinch.cy - pinch.pan.y) * k };
+  applyTransform();
+}, true);
+const endTouch = e => { touches.delete(e.pointerId); if (touches.size < 2) pinch = null; };
+vp.addEventListener('pointerup', endTouch, true);
+vp.addEventListener('pointercancel', endTouch, true);
+
+// ================================================================ Projekte
+const blobToDataURL = b => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(b); });
+async function thumbOf(f) {
+  try {  // createImageBitmap funktioniert auch in Hintergrund-Tabs zuverlässig
+    const bmp = await createImageBitmap(f.file), s = 96 / Math.max(bmp.width, bmp.height);
+    const c = document.createElement('canvas');
+    c.width = Math.max(1, Math.round(bmp.width * s)); c.height = Math.max(1, Math.round(bmp.height * s));
+    c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height); bmp.close();
+    return c.toDataURL('image/png');
+  } catch { return null; }
+}
+async function serialize() {
+  const files = [];
+  for (const f of state.files) {
+    if (!f.dataUrl) f.dataUrl = await blobToDataURL(f.file);
+    if (!f.thumb) f.thumb = await thumbOf(f);
+    files.push({ name: f.name, type: f.file.type, image: f.dataUrl, thumb: f.thumb, settings: f.settings, palette: f.palette,
+                 merge: f.merge, edits: f.edits, strokes: f.strokes, fixThin: f.fixThin, minMm: f.minMm, product: f.product || null, result: f.result });
+  }
+  return { version: 1, name: $('#pname').value.trim() || 'Unbenanntes Projekt', saved: Date.now(),
+           ui: { preset: state.preset, shirt: state.shirt, mockSize: $('#mSize').value, mockSide: $('#mSide').value, mockOff: $('#mOff').value },
+           files };
+}
+const slug = s => (s.toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g, '').replace(/ß/g, 'ss')
+  .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 50) || 'projekt');
+
+async function putProject(id, doc) {
+  const r = await fetch(`/api/projects/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(doc) });
+  if (!r.ok) throw new Error((await r.json()).detail || 'Speichern fehlgeschlagen');
+}
+async function saveProject() {
+  if (!state.files.length) return toast('Noch keine Motive im Projekt');
+  try {
+    if (!state.projectId) state.projectId = `${slug($('#pname').value)}-${Date.now().toString(36)}`;
+    await putProject(state.projectId, await serialize());
+    state.dirty = false; $('#savedInfo').textContent = 'Gespeichert ' + new Date().toLocaleTimeString('de', { hour: '2-digit', minute: '2-digit' });
+    toast('Projekt gespeichert');
+  } catch (e) { alert(e.message); }
+}
+$('#saveBtn').onclick = saveProject;
+
+let autoT;
+function markDirty() {
+  state.dirty = true;
+  if (state.files.length) $('#savedInfo').textContent = 'Nicht gespeichert';
+  clearTimeout(autoT);
+  autoT = setTimeout(async () => {  // automatische Sicherung der aktuellen Sitzung
+    if (!state.files.length || state.files.some(f => f.status === 'busy')) return;
+    try { const d = await serialize(); d.projectId = state.projectId; await putProject('autosave', d); } catch (e) { console.warn(e); }
+  }, 2500);
+}
+$('#pname').addEventListener('input', markDirty);
+
+async function loadProject(id) {
+  const r = await fetch(`/api/projects/${id}`);
+  if (!r.ok) return alert('Projekt konnte nicht geladen werden.');
+  const doc = await r.json();
+  state.files.forEach(f => URL.revokeObjectURL(f.url));
+  state.files = [];
+  for (const x of doc.files) {
+    const blob = await (await fetch(x.image)).blob();
+    const file = new File([blob], x.name, { type: x.type || blob.type });
+    const f = newFile(file, x.name);
+    Object.assign(f, { dataUrl: x.image, thumb: x.thumb, settings: x.settings, palette: x.palette, merge: x.merge,
+      edits: x.edits || {}, strokes: x.strokes || [], fixThin: !!x.fixThin, minMm: x.minMm ?? null, product: x.product || null, result: x.result,
+      status: x.result ? 'done' : 'idle' });
+    if (f.result) f.hist = [snap(f)];
+    state.files.push(f);
+  }
+  state.projectId = id === 'autosave' ? (doc.projectId || null) : id;
+  $('#pname').value = doc.name || 'Unbenanntes Projekt';
+  if (doc.ui) {
+    if (doc.ui.preset && state.presets[doc.ui.preset]) setPreset(doc.ui.preset, false);
+    $('#mSize').value = doc.ui.mockSize || 'L'; $('#mSide').value = doc.ui.mockSide || 'front'; $('#mOff').value = doc.ui.mockOff || 7;
+    const chip = document.querySelector(`.chip[data-c="${doc.ui.shirt}"]`);
+    setShirt(doc.ui.shirt || '#ffffff', chip || document.querySelector('.shirts label.chip'));
+  }
+  state.dirty = false; $('#savedInfo').textContent = id === 'autosave' ? 'Wiederhergestellt' : 'Geöffnet';
+  if (state.files.length) select(state.files[0].id); else renderFiles();
+  for (const f of state.files.filter(f => !f.result)) enqueue(() => process(f, settings(), 'auto'));
+}
+
+$('#openBtn').onclick = async () => {
+  const list = await (await fetch('/api/projects')).json(), box = $('#plist');
+  box.innerHTML = list.length ? '' : '<div class="pempty">Noch keine gespeicherten Projekte.</div>';
+  for (const p of list) {
+    const d = document.createElement('div'); d.className = 'pitem';
+    d.innerHTML = `${p.thumb ? `<img src="${p.thumb}" alt="">` : '<div class="ph"></div>'}
+      <div class="m"><b>${esc(p.autosave ? 'Letzte Sitzung (automatisch gesichert)' : p.name)}</b>
+      <small>${p.autosave ? esc(p.name) + ' · ' : ''}${p.files} Motiv${p.files === 1 ? '' : 'e'} · ${new Date(p.updated * 1000).toLocaleString('de', { dateStyle: 'medium', timeStyle: 'short' })}</small></div>
+      ${p.autosave ? '' : '<button class="ic" title="Projekt löschen"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg></button>'}`;
+    d.onclick = async () => {
+      if (state.dirty && state.files.length && !confirm('Aktuelle Änderungen sind nicht gespeichert. Trotzdem öffnen?')) return;
+      $('#openDlg').close(); await loadProject(p.id);
+    };
+    const del = d.querySelector('button');
+    if (del) del.onclick = async ev => {
+      ev.stopPropagation();
+      if (!confirm(`Projekt „${p.name}“ endgültig löschen? Das lässt sich nicht rückgängig machen.`)) return;
+      await fetch(`/api/projects/${p.id}`, { method: 'DELETE' });
+      if (state.projectId === p.id) state.projectId = null;
+      d.remove();
+    };
+    box.append(d);
+  }
+  $('#openDlg').showModal();
+};
+$('#dlgClose').onclick = () => $('#openDlg').close();
+
+$('#newBtn').onclick = () => {
+  if (state.dirty && state.files.length && !confirm('Aktuelle Änderungen sind nicht gespeichert. Trotzdem ein neues Projekt beginnen?')) return;
+  state.files.forEach(f => URL.revokeObjectURL(f.url));
+  state.files = []; state.cur = null; state.projectId = null; state.dirty = false;
+  $('#pname').value = 'Unbenanntes Projekt'; $('#savedInfo').textContent = '';
+  if (state.tool) setTool(null);
+  $('#stage').classList.add('hidden'); $('#empty').classList.remove('hidden');
+  renderFiles(); renderResult(); updateUndo(); offerRestore();
+};
+
+async function offerRestore() {
+  const boxes = [$('#restoreBox'), $('#restoreBox2')]; boxes.forEach(b => b.innerHTML = '');
+  try {
+    const a = (await (await fetch('/api/projects')).json()).find(p => p.autosave && p.files > 0);
+    if (!a || state.files.length) return;
+    for (const box of boxes) { box.innerHTML = `<button class="restore btn">${a.thumb ? `<img src="${a.thumb}" alt="">` : ''}
+      <span><b>Letzte Sitzung wiederherstellen</b><br><small>${esc(a.name)} · ${a.files} Motiv${a.files === 1 ? '' : 'e'} ·
+      ${new Date(a.updated * 1000).toLocaleString('de', { dateStyle: 'medium', timeStyle: 'short' })}</small></span></button>`;
+    box.querySelector('button').onclick = () => loadProject('autosave'); }
+  } catch (e) { /* kein Server-Speicher */ }
+}
+window.addEventListener('beforeunload', e => { if (state.dirty && state.files.length) { e.preventDefault(); e.returnValue = ''; } });
+
+// ================================================================ Export
+const SUFFIX = { svg: '.svg', pdf: '.pdf', eps: '.eps', png: '.png', films: '_Filme.pdf', cut: '_Schnittlinie.svg', cutpdf: '_Schnittlinie.pdf' };
+document.querySelectorAll('#dlBox [data-f]').forEach(b => b.onclick = async () => {
+  const f = cur(); if (!f || !f.result) return;
+  const c = compose(f), kind = b.dataset.f, cutOnly = kind === 'cut' || kind === 'cutpdf';
+  if (cutOnly && !c) return toast('Schnittlinien gibt es für Sticker, Aufnäher und Buttons');
+  const svg = cutOnly ? c.cutSvg : c ? c.svg : editedSvg(f);
+  const name = c ? `${f.name}_${PRODUCTS[prod(f).type]}` : f.name;
+  if (kind === 'svg' || kind === 'cut') return save(new Blob([svg], { type: 'image/svg+xml' }), `${name}${SUFFIX[kind]}`);
+  await busyBtn(b, async () => {
+    const fd = new FormData(); fd.append('svg', svg); fd.append('fmt', kind === 'cutpdf' ? 'pdf' : kind); fd.append('name', name);
+    fd.append('width_cm', c ? c.widthCm : f.settings.width_cm);
+    const r = await fetch('/api/export', { method: 'POST', body: fd });
+    if (!r.ok) throw new Error((await r.json()).detail);
+    save(await r.blob(), `${name}${SUFFIX[kind]}`);
+  });
+});
+$('#zipBtn').onclick = () => busyBtn($('#zipBtn'), async () => {
+  const items = state.files.filter(f => f.result).map(f => {
+    const c = compose(f);
+    return c ? { name: `${f.name}_${PRODUCTS[prod(f).type]}`, svg: c.svg, width_cm: c.widthCm, cut_svg: c.cutSvg }
+             : { name: f.name, svg: editedSvg(f), width_cm: +f.settings.width_cm };
+  });
+  const formats = [...document.querySelectorAll('#zipFmts input:checked')].map(i => i.value);
+  if (!formats.length) throw new Error('Mindestens ein Format wählen.');
+  const fd = new FormData(); fd.append('items', JSON.stringify(items)); fd.append('formats', JSON.stringify(formats));
+  const r = await fetch('/api/zip', { method: 'POST', body: fd });
+  if (!r.ok) throw new Error((await r.json()).detail);
+  save(await r.blob(), `${slug($('#pname').value)}.zip`);
+});
+async function busyBtn(b, fn) {
+  b.disabled = true; const t = b.textContent; b.textContent = 'Wird erstellt …';
+  try { await fn(); } catch (e) { alert('Export fehlgeschlagen: ' + e.message); }
+  b.disabled = false; b.textContent = t;
+}
+function save(blob, name) {
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+
+// ================================================================ Merch: Sticker, Aufnäher, Button
+// Form, Schnittlinie, Rand und Hintergrund werden hier im Browser berechnet, damit PC und Android-App
+// exakt dieselben Dateien liefern. Alle Pfade liegen im Koordinatensystem des Motivs (keine Transformationen),
+// so können beide Exporter (cairosvg / Kotlin) sie ohne Umrechnung zeichnen.
+const PRODUCTS = {
+  textil: 'T-Shirt & Textil', sticker: 'Sticker', patch: 'Aufnäher', button: 'Button',
+};
+const BUTTON_CUT = { 25: 33, 32: 43, 38: 47, 56: 67, 59: 70 }; // sichtbarer Ø → Druck-/Schnitt-Ø in mm (Richtwerte)
+const CUT_COLOR = '#FF00FF';
+const prod = f => (f && f.product && f.product.type !== 'textil') ? f.product : null;
+function defaultBg(f) {
+  const bg = f.result && f.result.background;
+  return (bg && /^#[0-9a-f]{6}$/i.test(bg) ? bg : '#FFFFFF').toUpperCase();
+}
+function productDefaults(type, f) {
+  const bg = defaultBg(f), dark = lab(bg)[0] < 50;
+  const art = f.result ? f.result.layers.filter(l => l.role === 'color' && !(f.edits[l.pi] || {}).hidden).map(l => layerHex(f, l.pi)) : [];
+  const contrast = art.find(h => dE00(lab(h), lab(bg)) > 25) || (dark ? '#FFFFFF' : '#1B1B1D');
+  if (type === 'sticker') return { type, shape: 'contour', gap: 3, bleed: 2, bg, transparent: false };
+  if (type === 'patch') return { type, shape: 'contour', gap: 2, border: 2.5, borderColor: contrast, bg };
+  if (type === 'button') return { type, d: 38, cut: BUTTON_CUT[38], bg };
+  return { type: 'textil' };
+}
+// Untergrund, auf dem gedruckt wird: Ebenen in dieser Farbe müssen nicht gedruckt werden
+function substrate(f) {
+  const p = prod(f);
+  if (!p) return state.shirt;
+  if (p.type === 'sticker' && p.transparent) return null;
+  return p.bg;
+}
+
+// ---------- Rasterisierung + Abstandsfelder
+function rasterArt(groups, box, k) {
+  const W = Math.ceil(box.w * k) + 2, H = Math.ceil(box.h * k) + 2;
+  const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  const ctx = cv.getContext('2d', { willReadFrequently: true });
+  ctx.setTransform(k, 0, 0, k, -box.x * k, -box.y * k);
+  for (const g of groups) for (const p of g.querySelectorAll('path')) { const d = p.getAttribute('d'); if (d) ctx.fill(new Path2D(d), 'evenodd'); }
+  const a = ctx.getImageData(0, 0, W, H).data, m = new Uint8Array(W * H);
+  for (let i = 0; i < m.length; i++) m[i] = a[i * 4 + 3] > 110 ? 1 : 0;
+  return { m, W, H };
+}
+function dt1(f, n, d, v, z) {
+  let k = 0; v[0] = 0; z[0] = -Infinity; z[1] = Infinity;
+  for (let q = 1; q < n; q++) {
+    let s = ((f[q] + q * q) - (f[v[k]] + v[k] * v[k])) / (2 * q - 2 * v[k]);
+    while (s <= z[k]) { k--; s = ((f[q] + q * q) - (f[v[k]] + v[k] * v[k])) / (2 * q - 2 * v[k]); }
+    k++; v[k] = q; z[k] = s; z[k + 1] = Infinity;
+  }
+  k = 0;
+  for (let q = 0; q < n; q++) { while (z[k + 1] < q) k++; d[q] = (q - v[k]) * (q - v[k]) + f[v[k]]; }
+}
+// Euklidischer Abstand jedes Pixels zum nächsten Pixel mit feat[i] === val (Felzenszwalb/Huttenlocher)
+function edt(feat, W, H, val = 1) {
+  const g = new Float64Array(W * H), N = Math.max(W, H);
+  const f = new Float64Array(N), d = new Float64Array(N), v = new Int32Array(N), z = new Float64Array(N + 1);
+  for (let i = 0; i < g.length; i++) g[i] = feat[i] === val ? 0 : 1e20;
+  for (let x = 0; x < W; x++) { for (let y = 0; y < H; y++) f[y] = g[y * W + x]; dt1(f, H, d, v, z); for (let y = 0; y < H; y++) g[y * W + x] = d[y]; }
+  const out = new Float32Array(W * H);
+  for (let y = 0; y < H; y++) { const o = y * W; for (let x = 0; x < W; x++) f[x] = g[o + x]; dt1(f, W, d, v, z); for (let x = 0; x < W; x++) out[o + x] = Math.sqrt(d[x]); }
+  return out;
+}
+// Isolinie F = t (innen: F < t) als geschlossene Polygone (Marching Squares, einheitlich orientiert)
+function isoLoops(F, W, H, t) {
+  const next = new Int32Array(W * H * 2).fill(-1);
+  const Hid = (i, j) => (j * W + i) * 2, Vid = (i, j) => (j * W + i) * 2 + 1;
+  const link = (a, b) => { next[a] = b; };
+  for (let j = 0; j < H - 1; j++) for (let i = 0; i < W - 1; i++) {
+    const tl = F[j * W + i] < t, tr = F[j * W + i + 1] < t, br = F[(j + 1) * W + i + 1] < t, bl = F[(j + 1) * W + i] < t;
+    const c = (tl ? 8 : 0) | (tr ? 4 : 0) | (br ? 2 : 0) | (bl ? 1 : 0);
+    if (c === 0 || c === 15) continue;
+    const T = Hid(i, j), B = Hid(i, j + 1), L = Vid(i, j), R = Vid(i + 1, j);
+    switch (c) {
+      case 1: link(L, B); break; case 2: link(B, R); break; case 3: link(L, R); break;
+      case 4: link(R, T); break; case 6: link(B, T); break; case 7: link(L, T); break;
+      case 8: link(T, L); break; case 9: link(T, B); break; case 11: link(T, R); break;
+      case 12: link(R, L); break; case 13: link(R, B); break; case 14: link(B, L); break;
+      case 5: { const mid = (F[j * W + i] + F[j * W + i + 1] + F[(j + 1) * W + i + 1] + F[(j + 1) * W + i]) / 4 < t;
+        if (mid) { link(L, T); link(R, B); } else { link(L, B); link(R, T); } break; }
+      case 10: { const mid = (F[j * W + i] + F[j * W + i + 1] + F[(j + 1) * W + i + 1] + F[(j + 1) * W + i]) / 4 < t;
+        if (mid) { link(T, R); link(B, L); } else { link(T, L); link(B, R); } break; }
+    }
+  }
+  const pt = id => {
+    const cell = id >> 1, i = cell % W, j = (cell - i) / W;
+    if (id & 1) { const a = F[j * W + i], b = F[(j + 1) * W + i]; return [i, j + (t - a) / (b - a)]; }
+    const a = F[j * W + i], b = F[j * W + i + 1]; return [i + (t - a) / (b - a), j];
+  };
+  const loops = [];
+  for (let s = 0; s < next.length; s++) {
+    if (next[s] < 0) continue;
+    const loop = []; let e = s;
+    while (e >= 0 && next[e] >= 0) { loop.push(pt(e)); const n = next[e]; next[e] = -1; e = n; }
+    if (loop.length > 8) loops.push(loop);
+  }
+  return loops;
+}
+function rdp(pts, eps) {
+  if (pts.length < 4) return pts;
+  const keep = new Uint8Array(pts.length); keep[0] = keep[pts.length - 1] = 1;
+  const st = [[0, pts.length - 1]];
+  while (st.length) {
+    const [a, b] = st.pop(); const [ax, ay] = pts[a], [bx, by] = pts[b];
+    const dx = bx - ax, dy = by - ay, len = Math.hypot(dx, dy) || 1e-9; let m = -1, md = eps;
+    for (let i = a + 1; i < b; i++) { const d = Math.abs((pts[i][0] - ax) * dy - (pts[i][1] - ay) * dx) / len; if (d > md) { md = d; m = i; } }
+    if (m > 0) { keep[m] = 1; st.push([a, m], [m, b]); }
+  }
+  return pts.filter((_, i) => keep[i]);
+}
+const n2 = v => (Math.round(v * 100) / 100).toString();
+// geschlossener, glatter Pfad durch die Punkte (Catmull-Rom → kubische Béziers)
+function smoothPath(pts) {
+  const n = pts.length; if (n < 3) return '';
+  let d = `M${n2(pts[0][0])} ${n2(pts[0][1])}`;
+  for (let i = 0; i < n; i++) {
+    const p0 = pts[(i - 1 + n) % n], p1 = pts[i], p2 = pts[(i + 1) % n], p3 = pts[(i + 2) % n];
+    d += `C${n2(p1[0] + (p2[0] - p0[0]) / 6)} ${n2(p1[1] + (p2[1] - p0[1]) / 6)} ${n2(p2[0] - (p3[0] - p1[0]) / 6)} ${n2(p2[1] - (p3[1] - p1[1]) / 6)} ${n2(p2[0])} ${n2(p2[1])}`;
+  }
+  return d + 'Z';
+}
+const KAPPA = 0.5522847498;
+function ellipsePath(cx, cy, rx, ry) {
+  const kx = rx * KAPPA, ky = ry * KAPPA;
+  return `M${n2(cx + rx)} ${n2(cy)}C${n2(cx + rx)} ${n2(cy + ky)} ${n2(cx + kx)} ${n2(cy + ry)} ${n2(cx)} ${n2(cy + ry)}` +
+    `C${n2(cx - kx)} ${n2(cy + ry)} ${n2(cx - rx)} ${n2(cy + ky)} ${n2(cx - rx)} ${n2(cy)}` +
+    `C${n2(cx - rx)} ${n2(cy - ky)} ${n2(cx - kx)} ${n2(cy - ry)} ${n2(cx)} ${n2(cy - ry)}` +
+    `C${n2(cx + kx)} ${n2(cy - ry)} ${n2(cx + rx)} ${n2(cy - ky)} ${n2(cx + rx)} ${n2(cy)}Z`;
+}
+function roundRectPath(x, y, w, h, r) {
+  r = Math.max(0, Math.min(r, w / 2, h / 2)); const k = r * (1 - KAPPA);
+  if (r < 1e-6) return `M${n2(x)} ${n2(y)}L${n2(x + w)} ${n2(y)}L${n2(x + w)} ${n2(y + h)}L${n2(x)} ${n2(y + h)}Z`;
+  return `M${n2(x + r)} ${n2(y)}L${n2(x + w - r)} ${n2(y)}C${n2(x + w - k)} ${n2(y)} ${n2(x + w)} ${n2(y + k)} ${n2(x + w)} ${n2(y + r)}` +
+    `L${n2(x + w)} ${n2(y + h - r)}C${n2(x + w)} ${n2(y + h - k)} ${n2(x + w - k)} ${n2(y + h)} ${n2(x + w - r)} ${n2(y + h)}` +
+    `L${n2(x + r)} ${n2(y + h)}C${n2(x + k)} ${n2(y + h)} ${n2(x)} ${n2(y + h - k)} ${n2(x)} ${n2(y + h - r)}` +
+    `L${n2(x)} ${n2(y + r)}C${n2(x)} ${n2(y + k)} ${n2(x + k)} ${n2(y)} ${n2(x + r)} ${n2(y)}Z`;
+}
+
+// ---------- Zusammensetzen: Druckdatei + reine Schnittlinie
+function compose(f) {
+  const p = prod(f); if (!p || !f.result) return null;
+  const src = editedSvg(f), pkey = JSON.stringify(p) + '|' + f.settings.width_cm;
+  if (f._pc && f._pc.src === src && f._pc.pkey === pkey) return f._pc;
+  const doc = new DOMParser().parseFromString(src, 'image/svg+xml'), root = doc.documentElement;
+  const [vx, vy, vw, vh] = root.getAttribute('viewBox').split(/[\s,]+/).map(Number);
+  const groups = [...root.querySelectorAll('g[data-color]')];
+  if (!groups.length) return null;
+  // Motiv grob rastern, um Ausdehnung und Mittelpunkt zu finden
+  const k0 = 700 / Math.max(vw, vh), r0 = rasterArt(groups, { x: vx, y: vy, w: vw, h: vh }, k0);
+  let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+  for (let j = 0; j < r0.H; j++) for (let i = 0; i < r0.W; i++) if (r0.m[j * r0.W + i]) { if (i < x0) x0 = i; if (i > x1) x1 = i; if (j < y0) y0 = j; if (j > y1) y1 = j; }
+  if (x1 < 0) return null;
+  const bb = { x: vx + x0 / k0, y: vy + y0 / k0, w: (x1 - x0 + 1) / k0, h: (y1 - y0 + 1) / k0 };
+  const cx = bb.x + bb.w / 2, cy = bb.y + bb.h / 2;
+  let rmax = 0;
+  for (let j = y0; j <= y1; j++) for (let i = x0; i <= x1; i++) if (r0.m[j * r0.W + i]) {
+    const dx = vx + (i + 0.5) / k0 - cx, dy = vy + (j + 0.5) / k0 - cy, d = dx * dx + dy * dy; if (d > rmax) rmax = d;
+  }
+  rmax = Math.sqrt(rmax) + 0.7 / k0;
+  // Einheiten pro mm
+  // Motivbreite = Breite des sichtbaren Motivs (ohne leeren Rand), Button: Motiv füllt 90 % der Fläche
+  const u = p.type === 'button' ? rmax / (0.45 * p.d) : bb.w / (f.settings.width_cm * 10);
+  let cut, outer = null, inner = null, mid = null, face = null;
+  const shape = p.shape || 'circle';
+  if (p.type === 'button') {
+    cut = ellipsePath(cx, cy, p.cut / 2 * u, p.cut / 2 * u); face = ellipsePath(cx, cy, p.d / 2 * u, p.d / 2 * u);
+  } else if (shape === 'contour') {
+    const gap = p.gap, extra = p.type === 'sticker' ? p.bleed : 0, close = Math.max(2, gap * 0.8 + 1.5);
+    const padMm = gap + extra + close + 3, pad = padMm * u;
+    const box = { x: bb.x - pad, y: bb.y - pad, w: bb.w + 2 * pad, h: bb.h + 2 * pad };
+    const k = 900 / Math.max(box.w, box.h), r = rasterArt(groups, box, k), { W, H } = r;
+    const gp = gap * u * k, cp = close * u * k;
+    const dA = edt(r.m, W, H, 1);                                // Abstand zum Motiv
+    const C = new Uint8Array(W * H); for (let i = 0; i < C.length; i++) C[i] = dA[i] <= gp + cp ? 1 : 0;
+    const dC = edt(C, W, H, 0);                                  // Abstand nach außen
+    const R = new Uint8Array(W * H); for (let i = 0; i < R.length; i++) R[i] = (C[i] && dC[i] >= cp) || r.m[i] ? 1 : 0;
+    // Löcher füllen: alles, was vom Rand aus nicht erreichbar ist, gehört zur Form
+    const out = new Uint8Array(W * H), st = [];
+    for (let i = 0; i < W; i++) { st.push(i, (H - 1) * W + i); } for (let j = 0; j < H; j++) { st.push(j * W, j * W + W - 1); }
+    while (st.length) { const q = st.pop(); if (out[q] || R[q]) continue; out[q] = 1; const i = q % W;
+      if (i > 0) st.push(q - 1); if (i < W - 1) st.push(q + 1); if (q >= W) st.push(q - W); if (q < W * (H - 1)) st.push(q + W); }
+    for (let i = 0; i < R.length; i++) R[i] = out[i] ? 0 : 1;
+    const dOut = edt(R, W, H, 1), dIn = edt(R, W, H, 0), S = new Float32Array(W * H);
+    for (let i = 0; i < S.length; i++) S[i] = R[i] ? 0.5 - dIn[i] : dOut[i] - 0.5;
+    const toU = loop => rdp(loop.map(([x, y]) => [box.x + (x + 0.5) / k, box.y + (y + 0.5) / k]), 0.35 / k);
+    const path = t => isoLoops(S, W, H, t).map(l => smoothPath(toU(l))).join('');
+    cut = path(0);
+    if (p.type === 'sticker' && p.bleed > 0 && !p.transparent) outer = path(p.bleed * u * k);
+    if (p.type === 'patch' && p.border > 0) { inner = path(-p.border * u * k); mid = path(-p.border / 2 * u * k); }
+  } else {
+    const g = p.gap * u;
+    const mk = lv => {
+      const o = g + lv * u;
+      if (shape === 'circle') return ellipsePath(cx, cy, rmax + o, rmax + o);
+      if (shape === 'oval') return ellipsePath(cx, cy, bb.w / 2 * Math.SQRT2 + o, bb.h / 2 * Math.SQRT2 + o);
+      const rc = shape === 'rounded' ? (p.gap + 3) * u + lv * u : 0;
+      return roundRectPath(bb.x - o, bb.y - o, bb.w + 2 * o, bb.h + 2 * o, rc);
+    };
+    cut = mk(0);
+    if (p.type === 'sticker' && p.bleed > 0 && !p.transparent) outer = mk(p.bleed);
+    if (p.type === 'patch' && p.border > 0) { inner = mk(-p.border); mid = mk(-p.border / 2); }
+  }
+  // Rahmen der Datei = äußerste Form
+  const bbox = d => { const nums = (d.match(/-?\d*\.?\d+(?:e[-+]?\d+)?/gi) || []).map(Number); let a = 1e9, b = 1e9, c = -1e9, e = -1e9;
+    for (let i = 0; i + 1 < nums.length; i += 2) { a = Math.min(a, nums[i]); c = Math.max(c, nums[i]); b = Math.min(b, nums[i + 1]); e = Math.max(e, nums[i + 1]); }
+    return [a, b, c - a, e - b]; };
+  const cb = bbox(cut), fb = bbox(outer || cut);
+  const vb = [fb[0], fb[1], fb[2], fb[3]];
+  const sw = 0.1 * u; // Schnittlinie 0,1 mm
+  const g = (id, label, hex, role, d, extra = '') =>
+    `<g id="${id}" inkscape:groupmode="layer" inkscape:label="${label}" data-color="${hex}" data-role="${role}" ${extra}><path d="${d}"/></g>`;
+  const bgHex = (p.bg || '#FFFFFF').toUpperCase();
+  const parts = [];
+  if (p.type === 'sticker' && !p.transparent) parts.push(g('hintergrund', `Hintergrund ${bgHex}`, bgHex, 'bg', outer || cut, `fill="${bgHex}" fill-rule="evenodd"`));
+  if (p.type === 'patch') parts.push(g('stoff', `Stoff ${bgHex}`, bgHex, 'bg', cut, `fill="${bgHex}" fill-rule="evenodd"`));
+  if (p.type === 'button') parts.push(g('hintergrund', `Hintergrund ${bgHex}`, bgHex, 'bg', cut, `fill="${bgHex}" fill-rule="evenodd"`));
+  const ser = new XMLSerializer();
+  for (const gr of groups) parts.push(ser.serializeToString(gr).replace(/ xmlns(:\w+)?="[^"]*"/g, ''));
+  if (p.type === 'patch' && inner) { const bc = p.borderColor.toUpperCase(); parts.push(g('rand', `Rand ${bc}`, bc, 'border', cut + inner, `fill="${bc}" fill-rule="evenodd"`)); }
+  const cutG = g('CutContour', 'CutContour', CUT_COLOR, 'cut', cut, `fill="none" stroke="${CUT_COLOR}" stroke-width="${n2(sw)}"`);
+  const head = (w, h) => `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" ` +
+    `width="${(w / u).toFixed(2)}mm" height="${(h / u).toFixed(2)}mm" viewBox="${vb.map(n2).join(' ')}">\n<!-- Erstellt mit Vektorwerk: ${PRODUCTS[p.type]} -->\n`;
+  const svg = head(vb[2], vb[3]) + parts.join('\n') + '\n' + cutG + '\n</svg>';
+  const cutSvg = head(vb[2], vb[3]) + cutG + '\n</svg>';
+  f._pc = { src, pkey, svg, cutSvg, vb, u, cut, outer, inner, mid, face, cx, cy, groupsSvg: parts.join(''),
+            artSvg: groups.map(gr => ser.serializeToString(gr)).join(''),
+            widthCm: vb[2] / u / 10, sizeMm: [cb[2] / u, cb[3] / u] };
+  return f._pc;
+}
+const exportSvgOf = f => { const c = compose(f); return c ? c.svg : editedSvg(f); };
+const exportWidthOf = f => { const c = compose(f); return c ? c.widthCm : +f.settings.width_cm; };
+
+// ---------- Vorschau des Produkts (im Mockup-Bereich)
+function productBox(f) {
+  const c = compose(f); if (!c) return [0, 0, 100, 100];
+  const [x, y, w, h] = c.vb, m = Math.max(w, h) * 0.12;
+  return [x - m, y - m, w + 2 * m, h + 2 * m];
+}
+function renderProductMock(f) {
+  const c = compose(f), box = $('#mock'), note = $('#mocknote'), p = prod(f);
+  if (!c) { box.innerHTML = ''; note.textContent = 'Kein Motiv sichtbar – blende mindestens eine Farbebene ein.'; return; }
+  const vb = productBox(f), u = c.u, sh = Math.max(vb[2], vb[3]) * 0.012;
+  const showCut = $('#mCut').checked;
+  const bg = p.bg || '#FFFFFF';
+  let body = '';
+  const defs = `<filter id="pdrop" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="${sh}" stdDeviation="${sh * 1.4}" flood-opacity=".28"/></filter>
+    <clipPath id="pclip"><path d="${c.cut}" clip-rule="evenodd"/></clipPath>
+    <pattern id="pchk" width="${sh * 8}" height="${sh * 8}" patternUnits="userSpaceOnUse"><rect width="${sh * 8}" height="${sh * 8}" fill="#fff"/><rect width="${sh * 4}" height="${sh * 4}" fill="#e6e6e6"/><rect x="${sh * 4}" y="${sh * 4}" width="${sh * 4}" height="${sh * 4}" fill="#e6e6e6"/></pattern>
+    <radialGradient id="pshine" cx=".35" cy=".25" r=".9"><stop offset="0" stop-color="#fff" stop-opacity=".45"/><stop offset=".5" stop-color="#fff" stop-opacity=".06"/><stop offset="1" stop-color="#000" stop-opacity=".18"/></radialGradient>
+    <filter id="ptex"><feTurbulence type="fractalNoise" baseFrequency="${2 / u}" numOctaves="2" seed="4"/><feColorMatrix values="0 0 0 0 .5  0 0 0 0 .5  0 0 0 0 .5  0 0 0 .5 0"/><feComposite in2="SourceGraphic" operator="in"/></filter>`;
+  if (p.type === 'sticker') {
+    body = `<g filter="url(#pdrop)"><path d="${c.cut}" fill="${p.transparent ? 'url(#pchk)' : bg}"/></g>
+      <g clip-path="url(#pclip)">${c.artSvg}<path d="${c.cut}" fill="url(#pshine)" opacity=".5"/></g>`;
+  } else if (p.type === 'patch') {
+    body = `<g filter="url(#pdrop)"><path d="${c.cut}" fill="${bg}"/></g>
+      <g clip-path="url(#pclip)">${c.artSvg}<path d="${c.cut}" fill="#000" filter="url(#ptex)" opacity=".25"/></g>
+      ${c.inner ? `<path d="${c.cut}${c.inner}" fill="${p.borderColor}" fill-rule="evenodd"/>
+      <path d="${c.mid}" fill="none" stroke="#fff" stroke-opacity=".28" stroke-width="${0.25 * u}" stroke-dasharray="${0.5 * u} ${0.35 * u}"/>
+      <path d="${c.mid}" fill="none" stroke="#000" stroke-opacity=".25" stroke-width="${p.border * u * 0.9}" stroke-dasharray="${0.12 * u} ${0.5 * u}"/>` : ''}`;
+  } else {
+    const r = p.d / 2 * u;
+    body = `<clipPath id="pface"><circle cx="${c.cx}" cy="${c.cy}" r="${r}"/></clipPath>
+      <g filter="url(#pdrop)"><circle cx="${c.cx}" cy="${c.cy}" r="${r}" fill="${bg}"/></g>
+      <g clip-path="url(#pface)">${c.artSvg}</g>
+      <circle cx="${c.cx}" cy="${c.cy}" r="${r}" fill="url(#pshine)"/>
+      <circle cx="${c.cx}" cy="${c.cy}" r="${r - 0.3 * u}" fill="none" stroke="#000" stroke-opacity=".18" stroke-width="${0.6 * u}"/>`;
+  }
+  const cutLine = showCut ? `<path d="${c.cut}" fill="none" stroke="${CUT_COLOR}" stroke-width="${Math.max(0.25 * u, vb[2] / 500)}" stroke-dasharray="${1.2 * u} ${0.8 * u}"/>` +
+    (p.type === 'button' ? `<circle cx="${c.cx}" cy="${c.cy}" r="${p.d / 2 * u}" fill="none" stroke="#00A3FF" stroke-width="${Math.max(0.2 * u, vb[2] / 600)}" stroke-dasharray="${0.8 * u} ${0.8 * u}"/>` : '') : '';
+  box.innerHTML = `<svg viewBox="${vb.map(n2).join(' ')}" xmlns="http://www.w3.org/2000/svg"><defs>${defs}</defs>${body}${cutLine}</svg>`;
+  const [w, h] = c.sizeMm, cm = v => fmt(v / 10);
+  note.classList.remove('bad');
+  note.textContent = p.type === 'sticker'
+    ? `Sticker ${cm(w)} × ${cm(h)} cm · Schnittlinie ${fmt(p.gap)} mm um das Motiv${p.bleed && !p.transparent ? ` · ${fmt(p.bleed)} mm Beschnitt` : p.transparent ? ' · transparente Folie' : ''}`
+    : p.type === 'patch' ? `Aufnäher ${cm(w)} × ${cm(h)} cm · Rand ${fmt(p.border)} mm`
+    : `Button Ø ${p.d} mm · Druckvorlage Ø ${p.cut} mm (inkl. Umschlag)`;
+  if (p.type === 'patch' && Math.min(w, h) < 30) { note.classList.add('bad'); note.textContent += ' · ⚠ Aufnäher unter 3 cm werden selten sauber gestickt'; }
+}
+
+// ---------- Einstellungen: Produktwahl und Optionen
+function setProduct(type) {
+  const f = cur(); if (!f) return;
+  const old = f.product && f.product.type;
+  if (old === type) return;
+  f.product = type === 'textil' ? null : productDefaults(type, f); f._pc = null;
+  let redo = autoKnockout(f);
+  if (type === 'patch' && (f.minMm == null || f.minMm < 1)) { f.minMm = 1.0; $('#minMm').value = 1; redo = true; }
+  // Shirt-Druckbreiten (25–30 cm) passen nicht zu Stickern/Aufnähern: auf 8 cm setzen, beim Zurückwechseln wiederherstellen
+  const w = +$('#width').value;
+  if ((type === 'sticker' || type === 'patch') && w > 15) { f._tw = w; $('#width').value = 8; redo = true; }
+  if (type === 'textil' && f._tw) { $('#width').value = f._tw; f._tw = null; redo = true; }
+  if (redo) refine(f);
+  if (type !== 'textil') setView('mockup');
+  renderProduct(); renderResult(); markDirty();
+  toast(type === 'textil' ? 'Produkt: T-Shirt & Textil' : `Produkt: ${PRODUCTS[type]} – Vorschau unter „Produkt“`);
+}
+function setProdOpt(key, val) {
+  const f = cur(), p = prod(f); if (!p) return;
+  p[key] = val; f._pc = null;
+  if (['bg', 'transparent'].includes(key) && autoKnockout(f)) refine(f);
+  if (state.view === 'mockup') { renderMockup(); if (key === 'd' || key === 'shape') fit(); }
+  renderProduct(true); markDirty();
+}
+function renderProduct(keepOpts) {
+  const f = cur(), p = prod(f), type = p ? p.type : 'textil';
+  document.querySelectorAll('#products .prod').forEach(b => b.classList.toggle('on', b.dataset.p === type));
+  document.body.dataset.product = type;
+  $('#view button[data-v="mockup"]').textContent = p ? 'Produkt' : 'Mockup';
+  $('#widthLabel').firstChild.textContent = type === 'textil' ? 'Druckbreite (cm)' : type === 'button' ? 'Motivbreite (automatisch)' : 'Motivbreite (cm) ';
+  $('#width').disabled = type === 'button';
+  if (keepOpts && document.activeElement && $('#prodOpts').contains(document.activeElement)) { renderProdInfo(); return; }
+  const box = $('#prodOpts'); box.innerHTML = '';
+  if (!p) return;
+  const seg = (key, opts) => `<div class="seg segw" data-k="${key}">${opts.map(([v, l]) => `<button data-v="${v}" class="${p[key] === v ? 'on' : ''}">${l}</button>`).join('')}</div>`;
+  const range = (key, label, min, max, step) => `<div class="field"><label>${label} <output>${fmt(p[key])} mm</output></label><input type="range" data-k="${key}" min="${min}" max="${max}" step="${step}" value="${p[key]}"></div>`;
+  const color = (key, label) => `<label class="pcolor"><span>${label}</span><input type="color" data-k="${key}" value="${(p[key] || '#ffffff').toLowerCase()}"></label>`;
+  let h = '';
+  if (p.type === 'sticker') {
+    h += `<div class="field"><label>Form</label>${seg('shape', [['contour', 'Kontur'], ['circle', 'Kreis'], ['rect', 'Rechteck'], ['rounded', 'Abgerundet']])}</div>`;
+    h += range('gap', 'Abstand zur Schnittlinie', 0, 10, 0.5);
+    h += `<div class="field"><label>Material</label>${seg('transparent', [[false, 'Bedruckter Hintergrund'], [true, 'Transparente Folie']])}</div>`;
+    if (!p.transparent) h += color('bg', 'Hintergrundfarbe');
+    if (!p.transparent) h += range('bleed', 'Beschnitt (Farbe über die Schnittlinie)', 0, 5, 0.5);
+    h += `<p class="hint">Die Schnittlinie liegt als eigene Ebene „CutContour“ in Magenta im PDF/SVG. Beschnitt: Die meisten Druckereien wollen 1–3 mm. Zum Plotten (Cricut, Silhouette): „Schnittlinie SVG“.</p>`;
+  } else if (p.type === 'patch') {
+    h += `<div class="field"><label>Form</label>${seg('shape', [['contour', 'Kontur'], ['circle', 'Kreis'], ['oval', 'Oval'], ['rect', 'Rechteck'], ['rounded', 'Abgerundet']])}</div>`;
+    h += range('gap', 'Abstand Motiv → Rand', 0, 10, 0.5);
+    h += range('border', 'Randbreite', 0, 6, 0.5);
+    h += `<div class="pcolors">${color('borderColor', 'Randfarbe')}${color('bg', 'Stofffarbe')}</div>`;
+    h += `<p class="hint">Gestickt: Details unter 1 mm markiert der Druck-Check. Die Stickdatei (z. B. DST) erstellt der Hersteller aus deinem PDF – gib ihm die Farbliste mit. Für gewebte oder gedruckte Aufnäher passt das PDF direkt.</p>`;
+  } else {
+    h += `<div class="field"><label>Größe</label>${seg('d', Object.keys(BUTTON_CUT).map(d => [+d, `${d} mm`]))}</div>`;
+    h += `<div class="field"><label>Druckvorlage Ø inkl. Umschlag (mm)</label><input type="number" data-k="cut" min="10" max="120" step="0.5" value="${p.cut}"></div>`;
+    h += color('bg', 'Hintergrundfarbe');
+    h += `<p class="hint">Der blaue Kreis in der Vorschau ist die sichtbare Fläche, Magenta die Schnittkante. Die Umschlag-Maße hängen von der Buttonmaschine ab – mit dem Hersteller abgleichen.</p>`;
+  }
+  h += `<div class="pinfo" id="prodInfo"></div><button class="btn sm" id="prodAll" style="width:100%">Auf alle Motive anwenden</button>`;
+  box.innerHTML = h;
+  box.querySelectorAll('.segw').forEach(s => s.querySelectorAll('button').forEach(b => b.onclick = () => {
+    let v = b.dataset.v; v = v === 'true' ? true : v === 'false' ? false : isNaN(+v) ? v : +v;
+    if (s.dataset.k === 'd') { cur().product.cut = BUTTON_CUT[v] || v + 10; }
+    setProdOpt(s.dataset.k, v); renderProduct();
+  }));
+  box.querySelectorAll('input[type=range]').forEach(i => i.oninput = () => { i.previousElementSibling.querySelector('output').textContent = fmt(+i.value) + ' mm'; setProdOpt(i.dataset.k, +i.value); });
+  box.querySelectorAll('input[type=color]').forEach(i => i.oninput = () => setProdOpt(i.dataset.k, i.value.toUpperCase()));
+  box.querySelectorAll('input[type=number]').forEach(i => i.onchange = () => setProdOpt(i.dataset.k, Math.max(10, +i.value || 10)));
+  $('#prodAll').onclick = () => {
+    const src = cur().product; let n = 0;
+    for (const g of state.files) if (g !== cur() && g.result) { g.product = { ...src, bg: src.bg }; g._pc = null; if (autoKnockout(g)) refine(g); n++; }
+    toast(n ? `Auf ${n} weitere${n > 1 ? '' : 's'} Motiv${n > 1 ? 'e' : ''} angewendet` : 'Keine weiteren Motive'); markDirty();
+  };
+  renderProdInfo();
+}
+function renderProdInfo() {
+  const f = cur(), el = $('#prodInfo'); if (!el || !prod(f)) return;
+  const c = compose(f); if (!c) { el.textContent = ''; return; }
+  const [w, h] = c.sizeMm;
+  el.innerHTML = `Endgröße: <b>${fmt(w / 10)} × ${fmt(h / 10)} cm</b>` + (prod(f).type !== 'button' ? ' · über „Motivbreite“ änderbar' : '');
+}
+document.querySelectorAll('#products .prod').forEach(b => b.onclick = () => { if (!cur() || !cur().result) return toast('Lade zuerst ein Motiv'); setProduct(b.dataset.p); });
+$('#mCut').onchange = () => renderMockup();
+
+function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]); }
+function fmt(n) { return (Math.round(n * 10) / 10).toLocaleString('de'); }
+
+init().then(() => { setShirt('#ffffff', document.querySelector('.chip[data-c]')); renderSteps(); if (store.get('onboarded') !== '1') showTour(0); });
+</script>
+</body>
+</html>

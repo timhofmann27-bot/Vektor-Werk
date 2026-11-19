@@ -1,0 +1,23 @@
+# Private Daten – nie veröffentlichen
+test-motive/
+vektorwerk/projekte/
+*.apk
+*.aab
+*.jks
+*.keystore
+signing.properties
+
+# Lokale Umgebung
+.claude/
+.venv/
+__pycache__/
+*.pyc
+.idea/
+.vscode/
+
+# Android-Build
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+.kotlin/

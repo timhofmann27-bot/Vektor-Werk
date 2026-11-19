@@ -1,0 +1,6 @@
+# Eigener Release-Schlüssel (optional). Datei als ~/.config/vektorwerk/signing.properties anlegen
+# oder den Pfad in der Umgebungsvariable VEKTORWERK_SIGNING angeben. Nie ins Repo legen.
+storeFile=/home/DU/.config/vektorwerk/vektorwerk-release.jks
+storePassword=...
+keyAlias=vektorwerk
+keyPassword=...
