@@ -1,3 +1,5 @@
+<p align="center"><img src="docs/logo.png" alt="Vektorwerk" width="200"></p>
+
 # Vektorwerk
 
 Macht aus Logos und Motiven (PNG/JPG/WEBP) druckfertige Vektordateien – für T-Shirts (Siebdruck, Flex/Flock, DTF), Sticker, Aufnäher und Buttons.
